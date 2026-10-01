@@ -99,11 +99,3 @@ Permitiría mostrar la ubicación sobre un mapa y calcular distancias. **Descart
 
 ### D. Etiquetas con código de barras / QR / RFID por producto o por anaquel
 Permitiría ubicar y contar con escaneo. **Descartada para el MVP** porque añade costo de hardware, impresión y procesos de escaneo que el negocio no tiene hoy, y no es necesaria para validar la hipótesis principal del MVP (que centralizar inventario y ubicación reduce el tiempo de búsqueda).
-
----
-
-## 6. Referencias
-
-- Documento *Seminario de Integración: Definición del problema 2026-B* (Backlog del proyecto).
-- Historias de usuario HU-1, HU-4, HU-5 y sus criterios de aceptación.
-- Sección MVP: funcionalidad "Registro de ubicación" (*Must*).
