@@ -23,9 +23,10 @@
 
 ---
 
-## 🧑‍💻 About us
+## 🧑‍💻 About the project
 
 Proposed Solution
+
 A web application will be developed for Papelería Los Piwis to centralize the registration, consultation, and control of inventory, assigning each product a standard location code. The owner will be able to log in, register products, stock levels, and locations, and consult or search for items by name. The system will identify out-of-stock or low-stock products and classify products according to demand. This will reduce search time, improve restocking, and make better use of available space.
 
 - Contac us
@@ -36,7 +37,7 @@ A web application will be developed for Papelería Los Piwis to centralize the r
 - angel.gonzalez0345@alumnos.udg.mx
 
 
-> *"First, solve the problem. Then, write the code."* — John Johnson
+> *"First, solve the problem. Then, write the code."* —
 
 ---
 
@@ -75,14 +76,6 @@ A web application will be developed for Papelería Los Piwis to centralize the r
 
 <p align="center">
   <img src="https://github-readme-streak-stats.herokuapp.com/?user=your-username&theme=tokyonight&hide_border=true&background=0d1117&ring=10b981&fire=f59e0b&currStreakLabel=10b981" alt="GitHub Streak" />
-</p>
-
----
-
-## 🏆 GitHub Trophies
-
-<p align="center">
-  <img src="https://github-profile-trophy.vercel.app/?username=your-username&theme=tokyonight&no-frame=true&no-bg=true&margin-w=4&row=1" alt="Trophies" />
 </p>
 
 ---
