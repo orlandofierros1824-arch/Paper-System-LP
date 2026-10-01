@@ -75,7 +75,7 @@ A web application will be developed for Papelería Los Piwis to centralize the r
     <img height="180em" src="https://github-readme-stats.vercel.app/api/top-langs/?username=your-username&layout=compact&langs_count=7&theme=tokyonight&hide_border=true&bg_color=0d1117&title_color=10b981&text_color=8b949e" alt="GitHub top languages card" />
 
 <p align="center">
-  <img src="https://github-readme-streak-stats.herokuapp.com/?user=your-username&theme=tokyonight&hide_border=true&background=0d1117&ring=10b981&fire=f59e0b&currStreakLabel=10b981" alt="GitHub Streak" />
+  <img src="https://github-readme-streak-stats.herokuapp.com/?user=Annglez&theme=tokyonight&hide_border=true&background=0d1117&ring=10b981&fire=f59e0b&currStreakLabel=10b981" alt="GitHub Streak" />
 </p>
 
 ---
