@@ -26,12 +26,12 @@
 
 ## 🧑‍💻 About us
 
-- 🔭 Currently building **scalable UI architectures** with React 18 & Next.js 14
-- 🌱 Deep-diving into **Web Performance, Core Web Vitals, and Edge Computing**
-- 💡 Passionate about **Developer Experience (DX)**, design systems, and open source
-- 🎯 2024 Goal: Contribute to **50+ open source projects** and ship my SaaS product
-- ☕ Fuel: **Specialty coffee** and lo-fi beats
-- 📫 Reach me: **alex@yourportfolio.dev**
+Proposed Solution
+A web application will be developed for Papelería Los Piwis to centralize the registration, consultation, and control of inventory, assigning each product a standard location code. The owner will be able to log in, register products, stock levels, and locations, and consult or search for items by name. The system will identify out-of-stock or low-stock products and classify products according to demand. This will reduce search time, improve restocking, and make better use of available space.
+
+- Contac us
+- orlando.fierros1824@alumos.udg.mx
+
 
 > *"First, solve the problem. Then, write the code."* — John Johnson
 
