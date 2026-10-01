@@ -1,14 +1,9 @@
 
         
-           Copy Markdown
-        
-        <!-- ========================================================
-  🚀 GitHub Profile README — The Modern Frontend Engineer
-  Copy this file into your [username]/[username] repository!
-  Replace all placeholder values with your own information.
-  ======================================================== -->
+  🚀 GitHub README — Seminario Integración: Desarrollo: Sistema de Gestión de Inventario de Papelería Los Piwis
+  ========================================================
 
-# Hi there, I'm Alex Chen! 👋🚀
+# Hi there, We are Paper System-LP! 👋🚀
 
 <p align="center">
   <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=22&pause=1000&color=10B981&center=true&vCenter=true&width=500&lines=Frontend+Engineer+%7C+React+Specialist;Open+Source+Contributor;UI%2FUX+Enthusiast;Always+learning+new+things+%F0%9F%8C%B1" alt="Typing SVG" />
@@ -29,7 +24,7 @@
 
 ---
 
-## 🧑‍💻 About Me
+## 🧑‍💻 About us
 
 - 🔭 Currently building **scalable UI architectures** with React 18 & Next.js 14
 - 🌱 Deep-diving into **Web Performance, Core Web Vitals, and Edge Computing**
