@@ -1,6 +1,5 @@
 
-        
-  🚀 GitHub README — Seminario Integración: Desarrollo: Sistema de Gestión de Inventario de Papelería Los Piwis
+  🚀 GitHub README [ENG VERSION]— Seminario Integración: Desarrollo: Sistema de Gestión de Inventario de Papelería Los Piwis
   ========================================================
 
 # Hi there, We are Paper System-LP! 👋🚀
@@ -31,6 +30,10 @@ A web application will be developed for Papelería Los Piwis to centralize the r
 
 - Contac us
 - orlando.fierros1824@alumos.udg.mx
+- miguel.lobo4231@alumno.udg.mx
+- erik.guardado3220@alumnos.udg.mx
+- edgar.uribe0684@alumno.udg.mx
+- angel.gonzalez0345@alumnos.udg.mx
 
 
 > *"First, solve the problem. Then, write the code."* — John Johnson
@@ -45,7 +48,7 @@ A web application will be developed for Papelería Los Piwis to centralize the r
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 ![Vue.js](https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vuedotjs&logoColor=4FC08D)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![Tailwind CSS](https://img.shieldsfnnnnnnnnnnnnnn.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 ![GraphQL](https://img.shields.io/badge/GraphQL-E10098?style=for-the-badge&logo=graphql&logoColor=white)
 
 ### Backend & Database
