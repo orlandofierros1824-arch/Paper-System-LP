@@ -79,6 +79,41 @@ A web application will be developed for Papelería Los Piwis to centralize the r
 </p>
 
 ---
+## 👥 Our Team
+
+<table align="center">
+  <tr>
+    <th align="center">Photo</th>
+    <th align="center">User</th>
+    <th align="center">Contributions</th>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/AnnGlez"><img src="https://github.com/AnnGlez.png" width="90" alt="AnnGlez" /></a></td>
+    <td align="center"><a href="https://github.com/AnnGlez"><b>AnnGlez</b></a><br/>Angel Gonzalez Flores</td>
+    <td><img src="https://ghchart.rshah.org/10b981/AnnGlez" alt="AnnGlez contributions" width="420" /></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/10miguelan"><img src="https://github.com/10miguelan.png" width="90" alt="10miguelan" /></a></td>
+    <td align="center"><a href="https://github.com/10miguelan"><b>10miguelan</b></a></td>
+    <td><img src="https://ghchart.rshah.org/10b981/10miguelan" alt="10miguelan contributions" width="420" /></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/erikmclovin2004"><img src="https://github.com/erikmclovin2004.png" width="90" alt="erikmclovin2004" /></a></td>
+    <td align="center"><a href="https://github.com/erikmclovin2004"><b>erikmclovin2004</b></a></td>
+    <td><img src="https://ghchart.rshah.org/10b981/erikmclovin2004" alt="erikmclovin2004 contributions" width="420" /></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/uribeedgar081-gif"><img src="https://github.com/uribeedgar081-gif.png" width="90" alt="uribeedgar081-gif" /></a></td>
+    <td align="center"><a href="https://github.com/uribeedgar081-gif"><b>uribeedgar081-gif</b></a><br/>EAdrian_UP</td>
+    <td><img src="https://ghchart.rshah.org/10b981/uribeedgar081-gif" alt="uribeedgar081-gif contributions" width="420" /></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/orlandofierros1824-arch"><img src="https://github.com/orlandofierros1824-arch.png" width="90" alt="orlandofierros1824-arch" /></a></td>
+    <td align="center"><a href="https://github.com/orlandofierros1824-arch"><b>orlandofierros1824-arch</b></a></td>
+    <td><img src="https://ghchart.rshah.org/10b981/orlandofierros1824-arch" alt="orlandofierros1824-arch contributions" width="420" /></td>
+  </tr>
+</table>
+
 
 ## 🚀 Featured Projects
 
