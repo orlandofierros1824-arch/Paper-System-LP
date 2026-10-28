@@ -6,7 +6,7 @@
 
 > **Nota:** Los siguientes bloqueos son riesgos identificados a partir del backlog y del ADR-001. Las fechas, los estados y las soluciones deben confirmarse con el equipo antes de considerarlos bloqueos ocurridos y resueltos.
 
-| ID | Descripción | Historia | Fecha de bloqueo | Estado | Cómo se destrabó o qué se usó |
+| ID | Descripción | Historia | Fecha de bloqueo | Estado | Que se probo  |
 | --- | --- | --- | --- | --- | --- |
 | BL-01 | Falta de un formato estándar para registrar la ubicación física de los productos, lo que puede generar datos inconsistentes y dificultar su búsqueda. | HU-1, HU-5 | Por confirmar | Por validar | Se propuso en el ADR-001 utilizar el código jerárquico `P{n}-A{n}-E{n}` (ejemplo: `P1-A2-E3`), almacenando pasillo, anaquel y estante en campos separados. |
 | BL-02 | Riesgo de que los productos se registren con ubicaciones incompletas o con formatos incorrectos, impidiendo su localización confiable. | HU-1, HU-5 | Por confirmar | Por validar | El ADR-001 establece validar el formato de ubicación y mostrar "ubicación pendiente" cuando todavía no se haya asignado una ubicación. |
