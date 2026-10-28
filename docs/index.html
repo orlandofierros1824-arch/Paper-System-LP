@@ -1,1 +1,386 @@
 
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Los Piwis | Inventario</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="topbar">
+        <span>Panel de control · Papelería Los Piwis</span>
+        <span>Organización · Inventario · Localización</span>
+    </div>
+
+    <header>
+        <div class="header-container">
+
+            <a href="#inicio" class="brand">
+                <div class="logo">P</div>
+                <div>
+                    <h2>LOS <span>PIWIS</span></h2>
+                    <small>PAPELERÍA · INVENTARIO</small>
+                </div>
+            </a>
+
+            <form class="search" id="searchForm">
+                <input
+                    type="search"
+                    id="searchInput"
+                    placeholder="Buscar producto, categoría o ubicación..."
+                    aria-label="Buscar productos"
+                >
+                <button type="submit" aria-label="Buscar">⌕</button>
+            </form>
+
+            <div class="admin">
+                <span>ⓘ ¿Necesitas ayuda?</span>
+                <strong>Guía rápida</strong>
+            </div>
+
+        </div>
+
+        <nav>
+            <a href="#inicio">Inicio</a>
+            <a href="#inventario">Inventario</a>
+            <a href="#ubicaciones">Ubicación de productos</a>
+            <a href="#agotados">Productos agotados</a>
+            <a href="#acciones">Accesos rápidos</a>
+        </nav>
+    </header>
+
+    <main id="inicio">
+
+        <section class="welcome">
+            <div>
+                <span class="eyebrow">CENTRO DE CONTROL</span>
+                <h1>Todo en su lugar.</h1>
+                <p>
+                    Consulta existencias, encuentra productos por su ubicación
+                    y detecta lo que necesita reposición desde un solo lugar.
+                </p>
+            </div>
+
+            <div class="date" id="todayDate"></div>
+        </section>
+
+        <section class="hero">
+            <div class="hero-main">
+                <span class="tag">GESTIÓN DE PRODUCTOS</span>
+
+                <h2>Encuentra lo que necesitas, sin perder tiempo.</h2>
+
+                <p>
+                    Busca un artículo y consulta su existencia y ubicación
+                    exacta: pasillo, anaquel y estante.
+                </p>
+
+                <button type="button" data-action="search">
+                    Buscar un producto →
+                </button>
+            </div>
+
+            <div class="hero-side">
+                <span>Estado general del inventario</span>
+                <h2>Control centralizado</h2>
+                <p>
+                    Información de ejemplo para visualizar
+                    el funcionamiento del sistema.
+                </p>
+                <div class="side-footer">
+                    <span>● Vista de demostración</span>
+                    <strong>Los Piwis</strong>
+                </div>
+            </div>
+        </section>
+
+        <div id="feedback" class="feedback" role="status"></div>
+
+        <section class="section-heading">
+            <div>
+                <h2>Resumen del inventario</h2>
+                <p>Indicadores de muestra para el prototipo inicial.</p>
+            </div>
+        </section>
+
+        <section class="stats">
+
+            <article class="stat">
+                <div class="icon red">▤</div>
+                <div>
+                    <label>Productos registrados</label>
+                    <strong>128</strong>
+                    <small>Catálogo de ejemplo</small>
+                </div>
+            </article>
+
+            <article class="stat">
+                <div class="icon blue">⌕</div>
+                <div>
+                    <label>Con ubicación asignada</label>
+                    <strong>116</strong>
+                    <small>Con código de localización</small>
+                </div>
+            </article>
+
+            <article class="stat">
+                <div class="icon amber">⚠</div>
+                <div>
+                    <label>Stock bajo</label>
+                    <strong>8</strong>
+                    <small>Revisar existencias</small>
+                </div>
+            </article>
+
+            <article class="stat">
+                <div class="icon green">✓</div>
+                <div>
+                    <label>Agotados</label>
+                    <strong>4</strong>
+                    <small>Requieren reposición</small>
+                </div>
+            </article>
+
+        </section>
+
+        <div class="content-grid">
+
+            <section id="inventario">
+
+                <div class="section-heading">
+                    <div>
+                        <h2>Productos destacados</h2>
+                        <p>Consulta rápida de artículos y disponibilidad.</p>
+                    </div>
+
+                    <button class="text-link" data-action="all">
+                        Ver catálogo →
+                    </button>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <h3>Catálogo de productos</h3>
+                            <p>Datos ilustrativos, aún sin base de datos.</p>
+                        </div>
+                        <span class="badge">Vista previa</span>
+                    </div>
+
+                    <div class="product-list" id="productList">
+
+                        <article class="product"
+                            data-name="Cuaderno profesional"
+                            data-category="Cuadernos"
+                            data-location="P1-A2-E3">
+
+                            <div class="product-icon">📓</div>
+
+                            <div>
+                                <h4>Cuaderno profesional</h4>
+                                <p>Cuadernos · Ubicación: P1-A2-E3</p>
+                            </div>
+
+                            <div class="stock">
+                                <strong>8 unidades</strong>
+                                <span class="status available">Disponible</span>
+                            </div>
+                        </article>
+
+                        <article class="product"
+                            data-name="Bolígrafo azul"
+                            data-category="Escritura"
+                            data-location="P1-A1-E2">
+
+                            <div class="product-icon">🖊️</div>
+
+                            <div>
+                                <h4>Bolígrafo azul</h4>
+                                <p>Escritura · Ubicación: P1-A1-E2</p>
+                            </div>
+
+                            <div class="stock">
+                                <strong>24 unidades</strong>
+                                <span class="status available">Disponible</span>
+                            </div>
+                        </article>
+
+                        <article class="product"
+                            data-name="Hojas blancas tamaño carta"
+                            data-category="Papel"
+                            data-location="P2-A1-E1">
+
+                            <div class="product-icon">📄</div>
+
+                            <div>
+                                <h4>Hojas blancas tamaño carta</h4>
+                                <p>Papel · Ubicación: P2-A1-E1</p>
+                            </div>
+
+                            <div class="stock">
+                                <strong>3 paquetes</strong>
+                                <span class="status low">Stock bajo</span>
+                            </div>
+                        </article>
+
+                        <article class="product"
+                            data-name="Pegamento en barra"
+                            data-category="Adhesivos"
+                            data-location="P2-A3-E2">
+
+                            <div class="product-icon">🧴</div>
+
+                            <div>
+                                <h4>Pegamento en barra</h4>
+                                <p>Adhesivos · Ubicación: P2-A3-E2</p>
+                            </div>
+
+                            <div class="stock">
+                                <strong>0 unidades</strong>
+                                <span class="status out">Agotado</span>
+                            </div>
+                        </article>
+
+                        <article class="product"
+                            data-name="Lápices HB"
+                            data-category="Escritura"
+                            data-location="P1-A1-E1">
+
+                            <div class="product-icon">✏️</div>
+
+                            <div>
+                                <h4>Lápices HB</h4>
+                                <p>Escritura · Ubicación: P1-A1-E1</p>
+                            </div>
+
+                            <div class="stock">
+                                <strong>15 unidades</strong>
+                                <span class="status available">Disponible</span>
+                            </div>
+                        </article>
+
+                        <div id="emptyState" class="empty-state">
+                            No se encontraron productos.
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <aside id="ubicaciones">
+
+                <div class="section-heading">
+                    <div>
+                        <h2>Guía de ubicaciones</h2>
+                        <p>Formato estándar de localización.</p>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <h3>¿Cómo encontrar un producto?</h3>
+                            <p>Lee el código de izquierda a derecha.</p>
+                        </div>
+                    </div>
+
+                    <div class="location-list">
+
+                        <div class="location">
+                            <strong>Pasillo</strong>
+                            <span>P1</span>
+                            <p>Indica el pasillo donde se encuentra el artículo.</p>
+                        </div>
+
+                        <div class="location">
+                            <strong>Anaquel</strong>
+                            <span>A2</span>
+                            <p>Identifica el mueble o sección del pasillo.</p>
+                        </div>
+
+                        <div class="location">
+                            <strong>Estante</strong>
+                            <span>E3</span>
+                            <p>Señala el nivel donde está guardado el producto.</p>
+                        </div>
+
+                        <div class="location-example">
+                            <small>Ejemplo de código completo</small>
+                            <strong>P1-A2-E3</strong>
+                            <p>Pasillo 1 · Anaquel 2 · Estante 3</p>
+                        </div>
+
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <section id="agotados">
+            <div class="section-heading">
+                <div>
+                    <h2>Atención prioritaria</h2>
+                    <p>Artículos que necesitan revisión.</p>
+                </div>
+
+                <button class="text-link" data-action="lowstock">
+                    Revisar existencias →
+                </button>
+            </div>
+
+            <div class="panel attention">
+                <div class="icon amber">⚠</div>
+                <div>
+                    <h3>Revisa los productos con stock bajo o agotado</h3>
+                    <p>
+                        Este bloque ayudará a identificar artículos que necesitan
+                        reposición. Los datos actuales son ilustrativos.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="acciones">
+            <div class="section-heading">
+                <div>
+                    <h2>Accesos rápidos</h2>
+                    <p>Acciones principales para el trabajo diario.</p>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <button class="quick" data-action="search">
+                    <div class="icon red">⌕</div>
+                    <strong>Buscar producto</strong>
+                    <p>Consulta disponibilidad y ubicación.</p>
+                </button>
+
+                <button class="quick" data-action="all">
+                    <div class="icon blue">▤</div>
+                    <strong>Consultar inventario</strong>
+                    <p>Revisa los productos de la vista previa.</p>
+                </button>
+
+                <button class="quick" data-action="lowstock">
+                    <div class="icon amber">⚠</div>
+                    <strong>Revisar agotados</strong>
+                    <p>Filtra artículos que requieren atención.</p>
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <strong>Papelería Los Piwis</strong>
+        <span>Sistema de organización y localización de productos</span>
+        <span>Prototipo inicial · Datos ilustrativos</span>
+    </footer>
+
+    <div id="toast" class="toast" role="status"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
