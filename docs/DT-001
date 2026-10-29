@@ -1,0 +1,21 @@
+### DT-001: `Falta de pruebas automatizadas en los endpoints de autenticación y productos`
+| Campo | Detalle |
+|-------|---------|
+| **Descripción** | Los endpoints críticos del backend en Python (`/api/auth/login` y `/api/products`) carecen de pruebas unitarias y de integración. |
+| **Ubicación** | `backend/tests/` (Módulo de pruebas ausente) |
+| **Impacto** | 🔴 Alto |
+| **Prioridad** | 🔴 Alta |
+| **Solución propuesta** | Implementar un conjunto de pruebas utilizando `pytest` y `unittest` para validar JWT y operaciones CRUD de inventario. |
+| **Esfuerzo estimado** | `M` |
+| **Responsable** | `Equipo de Desarrollo Backend` |
+| **Fecha de registro** | `2026-10-01` |
+| **Estado** | `Pendiente` |
+
+**Detalle:**
+Debido a la prisa por entregar las primeras historias de usuario del MVP, se priorizó la funcionalidad sobre la cobertura de pruebas. Si se modifica la lógica de autenticación o el esquema de base de datos, existe alto riesgo de introducir regresiones no detectadas.
+**Criterios de aceptación:**
+- [ ] Configurar el entorno de pruebas con `pytest` en el backend.
+- [ ] Alcanzar al menos un `60%` de cobertura en los endpoints principales de inventario.
+- [ ] Integrar las pruebas en el pipeline de CI/CD en GitHub Actions.
+
+---
