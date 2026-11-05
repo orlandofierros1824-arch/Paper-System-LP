@@ -1,4 +1,4 @@
-# AT-01 — Verificar el diseño, legibilidad y responsividad de la interfaz de usuario
+# TEST 03 — Verificar el diseño, legibilidad y responsividad de la interfaz de usuario
 
 ## 1. Información general
 
