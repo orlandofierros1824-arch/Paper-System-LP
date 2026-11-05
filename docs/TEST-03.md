@@ -8,7 +8,7 @@
 
 * **Tipo de prueba:** Aceptación / Interfaz de Usuario (UI/UX)
 
-* **ID de prueba:** AT-01
+* **ID de prueba:** TE-03
 
 * **Responsable:** Miguel lobo
 
