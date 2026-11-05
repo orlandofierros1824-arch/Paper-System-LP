@@ -48,9 +48,11 @@
 
 - Captura de pantalla:
 <img width="1917" height="972" alt="Captura de pantalla 2026-11-04 205813" src="https://github.com/user-attachments/assets/00659261-7b97-4768-8af4-28cd4c66c1e3" />
+- Captura de registro:
+  <img width="1913" height="958" alt="Captura de pantalla 2026-11-04 212526" src="https://github.com/user-attachments/assets/48bc9970-1674-4448-add3-7d7f1ac397ea" />
 
 - Resultado de consulta SQL:
-  <img width="1917" height="1016" alt="Captura de pantalla 2026-11-04 204922" src="https://github.com/user-attachments/assets/b1e6d86f-e543-4ff9-a047-d71b27b44e25" />
+<img width="1916" height="1018" alt="Captura de pantalla 2026-11-04 212605" src="https://github.com/user-attachments/assets/4b4606f1-533f-43ab-8586-e23080211222" />
 
 ## 8. Observaciones
 
