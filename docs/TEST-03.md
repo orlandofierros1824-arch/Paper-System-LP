@@ -80,8 +80,5 @@
 
 ## 7. Evidencias
 
-* \[ \] Captura de pantalla de la vista principal de búsqueda en escritorio.
+<img width="1919" height="1034" alt="Captura de pantalla 2026-11-04 212143" src="https://github.com/user-attachments/assets/421f2ffb-4718-45e2-8ba3-9afbddf71edc" />
 
-* \[ \] Captura de pantalla de la tarjeta de detalle de producto con su código de ubicación (`P1-A2-E3`).
-
-* \[ \] Captura de pantalla de la adaptación responsiva en vista móvil.
