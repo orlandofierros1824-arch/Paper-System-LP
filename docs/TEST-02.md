@@ -50,4 +50,5 @@
 
 ## 7. Evidencias
 
+<img width="1600" height="849" alt="4d81414e-1db1-4169-8029-1a09a44ee6aa" src="https://github.com/user-attachments/assets/36bc84db-3624-4d4d-9d5a-cdf53daffe00" />
 
