@@ -1,11 +1,178 @@
 <!DOCTYPE html>
-<html lang="en">
+<!--
+  ARCHIVO: productos.html
+  QUÉ ES: pantalla de ADMINISTRACIÓN de productos (solo dueño y empleados).
+  Permite ver todos los productos, crear, editar, registrar entradas/salidas
+  de existencias y (solo el dueño) desactivar productos.
+  SE CONECTA CON:
+    - style.css, auth.css, productos.css -> diseño
+    - productos.js -> pide y envía los datos al servidor (rutas /api/admin/...)
+  La tabla empieza vacía: productos.js la llena con lo que hay en la base de datos.
+-->
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Los Piwis | Administrar productos</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="auth.css">
+    <link rel="stylesheet" href="productos.css">
 </head>
 <body>
-    
+
+    <div class="topbar">
+        <span>Panel de control · Papelería Los Piwis</span>
+        <span>Organización · Inventario · Localización</span>
+    </div>
+
+    <header>
+        <div class="auth-header">
+            <a href="index.html" class="brand">
+                <div class="logo">P</div>
+                <div>
+                    <h2>LOS <span>PIWIS</span></h2>
+                    <small>PAPELERÍA · INVENTARIO</small>
+                </div>
+            </a>
+            <div class="header-right">
+                <!-- productos.js escribe aquí el nombre del usuario -->
+                <span id="userName"></span>
+                <a class="back-link" href="index.html">Ver inventario</a>
+                <button type="button" class="btn ghost" id="logoutBtn">Cerrar sesión</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="admin-main">
+
+        <div class="section-heading">
+            <div>
+                <h2>Administrar productos</h2>
+                <p id="resultCount">Cargando productos...</p>
+            </div>
+            <button type="button" class="btn primary" id="nuevoBtn" hidden>+ Nuevo producto</button>
+        </div>
+
+        <!-- Mensajes generales (errores de conexión, confirmaciones) -->
+        <div id="authMessage" class="auth-message" role="status"></div>
+
+        <!-- Buscador y filtros -->
+        <div class="toolbar">
+            <input type="search" id="buscar" placeholder="Buscar por nombre, código, categoría o ubicación..."
+                   aria-label="Buscar productos">
+            <div class="filters">
+                <button type="button" class="chip active" data-filter="all">Todos</button>
+                <button type="button" class="chip" data-filter="low">Stock bajo</button>
+                <button type="button" class="chip" data-filter="out">Agotados</button>
+                <button type="button" class="chip" data-filter="inactive">Inactivos</button>
+            </div>
+        </div>
+
+        <!-- Tabla de productos (las filas las crea productos.js) -->
+        <div class="panel tabla-wrap">
+            <table class="tabla">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Producto</th>
+                        <th>Categoría</th>
+                        <th>Ubicación</th>
+                        <th class="num">Precio</th>
+                        <th class="num">Existencias</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaBody"></tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- ===== VENTANA: crear / editar producto ===== -->
+    <dialog id="dlgProducto">
+        <form id="formProducto" class="dlg-form" novalidate>
+            <h3 id="dlgProductoTitulo">Nuevo producto</h3>
+            <div id="errProducto" class="auth-message" role="alert"></div>
+
+            <div class="row2">
+                <label class="field"><span>Código</span>
+                    <input name="codigo" maxlength="60" required></label>
+                <label class="field"><span>Unidad de medida</span>
+                    <input name="unidad" maxlength="30" value="pieza" required></label>
+            </div>
+
+            <label class="field"><span>Nombre</span>
+                <input name="nombre" maxlength="160" required></label>
+
+            <label class="field"><span>Descripción (opcional)</span>
+                <textarea name="descripcion" rows="2" maxlength="2000"></textarea></label>
+
+            <div class="row2">
+                <label class="field"><span>Categoría</span>
+                    <div class="inline">
+                        <select name="id_categoria" required></select>
+                        <button type="button" class="btn ghost small" id="nuevaCatBtn" title="Crear categoría">+</button>
+                    </div>
+                </label>
+                <label class="field"><span>Ubicación</span>
+                    <div class="inline">
+                        <select name="id_ubicacion"></select>
+                        <button type="button" class="btn ghost small" id="nuevaUbiBtn" title="Crear ubicación">+</button>
+                    </div>
+                </label>
+            </div>
+
+            <div class="row3">
+                <label class="field"><span>Precio</span>
+                    <input name="precio" type="number" min="0" step="0.01" value="0" required></label>
+                <label class="field"><span>Stock mínimo</span>
+                    <input name="stock_minimo" type="number" min="0" step="1" value="0" required></label>
+                <!-- Solo al crear. Después, las existencias se cambian con "Movimiento" -->
+                <label class="field" id="stockField"><span>Existencias iniciales</span>
+                    <input name="stock" type="number" min="0" step="1" value="0"></label>
+            </div>
+
+            <div class="dlg-actions">
+                <button type="button" class="btn ghost" data-cerrar>Cancelar</button>
+                <button type="submit" class="btn primary">Guardar</button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- ===== VENTANA: movimiento de existencias ===== -->
+    <dialog id="dlgMovimiento">
+        <form id="formMovimiento" class="dlg-form" novalidate>
+            <h3>Movimiento de existencias</h3>
+            <p id="movProducto" class="dlg-sub"></p>
+            <div id="errMov" class="auth-message" role="alert"></div>
+
+            <label class="field"><span>Tipo</span>
+                <select name="tipo">
+                    <option value="ENTRADA">Entrada (llegó mercancía)</option>
+                    <option value="SALIDA">Salida (venta o uso)</option>
+                    <option value="AJUSTE_POSITIVO">Ajuste positivo (corrección, sumar)</option>
+                    <option value="AJUSTE_NEGATIVO">Ajuste negativo (merma o corrección, restar)</option>
+                </select></label>
+
+            <div class="row2">
+                <label class="field"><span>Cantidad</span>
+                    <input name="cantidad" type="number" min="1" step="1" value="1" required></label>
+                <label class="field"><span>Motivo (opcional)</span>
+                    <input name="motivo" maxlength="255"></label>
+            </div>
+
+            <div class="dlg-actions">
+                <button type="button" class="btn ghost" data-cerrar>Cancelar</button>
+                <button type="submit" class="btn primary">Registrar</button>
+            </div>
+        </form>
+    </dialog>
+
+    <footer>
+        <strong>Papelería Los Piwis</strong>
+        <span>Sistema de organización y localización de productos</span>
+    </footer>
+
+    <script src="productos.js"></script>
 </body>
 </html>
