@@ -1,21 +1,37 @@
 <!DOCTYPE html>
+<!--
+  ARCHIVO: index.html
+  QUÉ ES: la estructura de la página (qué elementos existen y en qué orden).
+  SE CONECTA CON:
+    - style.css  -> le da el diseño (colores, tamaños, posiciones)
+    - script.js  -> le da el comportamiento (carrusel, búsqueda, datos)
+  NOTA: este archivo NO contiene productos. Las listas que están vacías aquí
+  (#slides, #dots, #productList) las llena script.js al abrir la página.
+-->
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <!-- Hace que la página se adapte a celulares -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Texto que aparece en la pestaña del navegador -->
     <title>Los Piwis | Inventario</title>
+    <!-- CONEXIÓN: carga el diseño desde style.css (debe estar en la misma carpeta) -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+    <!-- ===== BARRA SUPERIOR =====
+         Franja oscura con texto informativo. Es solo decorativa. -->
     <div class="topbar">
         <span>Panel de control · Papelería Los Piwis</span>
         <span>Organización · Inventario · Localización</span>
     </div>
 
+    <!-- ===== ENCABEZADO ===== -->
     <header>
         <div class="header-container">
 
+            <!-- Logo y nombre. Al hacer clic regresa al inicio de la página (#inicio) -->
             <a href="#inicio" class="brand">
                 <div class="logo">P</div>
                 <div>
@@ -24,6 +40,10 @@
                 </div>
             </a>
 
+            <!-- BUSCADOR
+                 id="searchForm"  -> script.js detecta cuando se envía el formulario
+                 id="searchInput" -> script.js lee lo que escribes aquí
+                 MUESTRA: filtra la lista de productos por nombre, categoría o ubicación -->
             <form class="search" id="searchForm">
                 <input
                     type="search"
@@ -34,6 +54,8 @@
                 <button type="submit" aria-label="Buscar">⌕</button>
             </form>
 
+            <!-- Texto de ayuda (por ahora solo informativo, sin función) -->
+            <!-- ACCESO: lleva a la pantalla de inicio de sesión y registro (login.html) -->
             <a class="admin admin-link" id="sessionLink" href="login.html">
                 <span>¿Eres parte del equipo?</span>
                 <strong>Iniciar sesión</strong>
@@ -41,6 +63,10 @@
 
         </div>
 
+        <!-- ===== BARRA DE NAVEGACIÓN =====
+             Los href="#..." mueven la pantalla a una sección de esta misma página.
+             data-filter -> script.js, además de moverte, aplica ese filtro
+             a la lista de productos ("all" = todos, "out" = agotados). -->
         <nav>
             <a href="#inicio">Inicio</a>
             <a href="#inventario" data-filter="all">Inventario</a>
@@ -51,30 +77,47 @@
 
     <main id="inicio">
 
+        <!-- ===== CARRUSEL DE IMÁGENES =====
+             data-interval="5000" -> tiempo entre imagen e imagen, en MILISEGUNDOS
+                                     (5000 = 5 segundos; 3000 = 3 segundos).
+             MUESTRA: las imágenes definidas en el arreglo SLIDES de script.js.
+             Los contenedores de abajo empiezan vacíos: script.js crea ahí
+             las imágenes (#slides) y los puntos indicadores (#dots). -->
         <section class="carousel" id="carousel" data-interval="5000"
                  aria-roledescription="carrusel" aria-label="Imágenes de la papelería">
             <div class="slides" id="slides"></div>
 
+            <!-- Flechas: script.js las usa para ir a la imagen anterior / siguiente -->
             <button class="arrow prev" type="button" aria-label="Imagen anterior">‹</button>
             <button class="arrow next" type="button" aria-label="Imagen siguiente">›</button>
+
+            <!-- Puntitos de abajo: uno por imagen, para saltar a una en concreto -->
             <div class="dots" id="dots"></div>
         </section>
 
+        <!-- ===== AVISO DE ERROR =====
+             Está oculto. script.js muestra aquí un mensaje si no puede
+             conectarse con la base de datos. -->
         <div id="feedback" class="feedback" role="status"></div>
 
         <div class="content-grid">
 
+            <!-- ===== SECCIÓN DE INVENTARIO =====
+                 MUESTRA: los productos que llegan de la base de datos
+                 (la dirección se configura en API_PRODUCTOS dentro de script.js). -->
             <section id="inventario">
                 <div class="section-heading">
                     <div>
                         <h2>Inventario</h2>
-
+                        <!-- script.js escribe aquí cuántos productos se ven, ej. "3 de 20 productos" -->
                         <p id="resultCount">Cargando productos...</p>
                     </div>
                 </div>
 
                 <div class="panel">
                     <div class="panel-header">
+                        <!-- Botones de filtro. data-filter indica qué productos mostrar:
+                             all = todos | low = stock bajo | out = agotados -->
                         <div class="filters" id="filters">
                             <button type="button" class="chip active" data-filter="all">Todos</button>
                             <button type="button" class="chip" data-filter="low">Stock bajo</button>
@@ -82,10 +125,15 @@
                         </div>
                     </div>
 
+                    <!-- Aquí script.js dibuja una fila por cada producto.
+                         Está vacío a propósito: los datos vienen de la base. -->
                     <div class="product-list" id="productList"></div>
                 </div>
             </section>
 
+            <!-- ===== GUÍA DE UBICACIONES =====
+                 Texto fijo (no viene de la base de datos). Explica cómo
+                 leer un código como P1-A2-E3 para encontrar un producto. -->
             <aside id="ubicaciones">
                 <div class="section-heading">
                     <div>
@@ -120,11 +168,14 @@
 
     </main>
 
+    <!-- ===== PIE DE PÁGINA: texto fijo ===== -->
     <footer>
         <strong>Papelería Los Piwis</strong>
         <span>Sistema de organización y localización de productos</span>
     </footer>
 
+    <!-- CONEXIÓN: carga el comportamiento desde script.js.
+         Va al final para que la página ya exista cuando el script se ejecute. -->
     <script src="script.js"></script>
 </body>
 </html>
