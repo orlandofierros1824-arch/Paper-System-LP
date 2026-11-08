@@ -12,12 +12,27 @@ const rateLimit = require("express-rate-limit");
 const app = express();
 const PROD = process.env.NODE_ENV === "production";
 
-app.set("trust proxy", 1); 
-
+app.set("trust proxy", 1); // necesario detrás del proxy de Render
+/* ---------- Sesión actual ---------- */
+app.get("/api/me", async (req, res) => {
+    try {
+        const t = jwt.verify(req.cookies?.piwis_token, process.env.JWT_SECRET);
+        const [rows] = await pool.execute(
+            "SELECT nombre FROM usuarios WHERE id_usuario = ? AND activo = TRUE",
+            [t.id]
+        );
+        if (!rows[0]) return res.status(401).json({ error: "Sin sesión" });
+        res.json({ nombre: rows[0].nombre, rol: t.rol });
+        } catch (err) {
+        console.error("api/me:", err.message);
+        res.status(401).json({ error: "Sin sesión" });
+    }
+});
 app.use(helmet());
 app.use(express.json({ limit: "10kb" }));
-app.use(cookieParser()); 
+app.use(cookieParser());
 
+/* ---------- Base de datos (Aiven exige SSL) ---------- */
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
     port: Number(process.env.DB_PORT),
@@ -30,49 +45,15 @@ const pool = mysql.createPool({
 });
 
 const EMAIL_VALIDO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PERSONAL = ["DUENO", "EMPLEADO"];  
 
+/* Limita intentos para frenar ataques de fuerza bruta */
 const limiteAuth = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 30,
     message: { error: "Demasiados intentos. Espera unos minutos." }
 });
-async function usuarioActual(req) {
-    const token = req.cookies?.piwis_token;
-    if (!token) return null;
-    try {
-        const t = jwt.verify(token, process.env.JWT_SECRET);
-        const [rows] = await pool.execute(
-            `SELECT u.id_usuario AS id, u.nombre, r.codigo AS rol
-             FROM usuarios u JOIN roles r ON r.id_rol = u.id_rol
-             WHERE u.id_usuario = ? AND u.activo = TRUE AND r.activo = TRUE`,
-            [t.id]
-        );
-        return rows[0] ?? null;
-    } catch (err) {
-        if (err.name !== "JsonWebTokenError" && err.name !== "TokenExpiredError")
-            console.error("usuarioActual:", err.message);
-        return null;
-    }
-}
 
-function requiereRol(...roles) {
-    return async (req, res, next) => {
-        const u = await usuarioActual(req);
-        if (!u) return res.status(401).json({ error: "Inicia sesión para continuar." });
-        if (!roles.includes(u.rol))
-            return res.status(403).json({ error: "No tienes permiso para esta acción." });
-        req.usuario = u;
-        next();
-    };
-}
-
-app.get("/api/me", async (req, res) => {
-    const u = await usuarioActual(req);
-    if (!u) return res.status(401).json({ error: "Sin sesión" });
-    res.json({ nombre: u.nombre, rol: u.rol });
-});
-
+/* ---------- Registro ---------- */
 app.post("/api/registro", limiteAuth, async (req, res) => {
     try {
         const nombre = String(req.body.nombre ?? "").trim();
@@ -89,6 +70,7 @@ app.post("/api/registro", limiteAuth, async (req, res) => {
 
         const hash = await bcrypt.hash(password, 12);
 
+        // El rol lo decide el servidor: todo registro público es CLIENTE
         const [r] = await pool.execute(
             `INSERT INTO usuarios (nombre, correo, password_hash, id_rol)
              SELECT ?, ?, ?, id_rol FROM roles WHERE codigo = 'CLIENTE'`,
@@ -106,6 +88,7 @@ app.post("/api/registro", limiteAuth, async (req, res) => {
     }
 });
 
+/* ---------- Login ---------- */
 app.post("/api/login", limiteAuth, async (req, res) => {
     try {
         const correo = String(req.body.correo ?? "").trim().toLowerCase();
@@ -123,8 +106,8 @@ app.post("/api/login", limiteAuth, async (req, res) => {
 
         const token = jwt.sign({ id: u.id_usuario, rol: u.rol }, process.env.JWT_SECRET, { expiresIn: "8h" });
         res.cookie("piwis_token", token, {
-            httpOnly: true,       
-            secure: PROD,         
+            httpOnly: true,       // JavaScript del navegador no puede leerla
+            secure: PROD,         // solo por HTTPS en producción
             sameSite: "lax",
             maxAge: 8 * 60 * 60 * 1000
         });
@@ -140,7 +123,7 @@ app.post("/api/logout", (req, res) => {
     res.json({ mensaje: "Sesión cerrada" });
 });
 
-
+/* ---------- Productos (público, como en tu index.html) ---------- */
 app.get("/api/productos", async (req, res) => {
     try {
         const [rows] = await pool.query(
@@ -155,239 +138,7 @@ app.get("/api/productos", async (req, res) => {
     }
 });
 
-const MAX_ID = Number.MAX_SAFE_INTEGER;
-
-/* Devuelve el número si es entero entre min y max; si no, null */
-function entero(v, min, max) {
-    if (v === "" || v === null || v === undefined) return null;
-    const n = Number(v);
-    return Number.isInteger(n) && n >= min && n <= max ? n : null;
-}
-
-function leerProducto(b) {
-    const codigo = String(b.codigo ?? "").trim();
-    const nombre = String(b.nombre ?? "").trim();
-    const descripcion = String(b.descripcion ?? "").trim() || null;
-    const unidad = String(b.unidad ?? "pieza").trim() || "pieza";
-    const id_categoria = entero(b.id_categoria, 1, MAX_ID);
-    const id_ubicacion = b.id_ubicacion ? entero(b.id_ubicacion, 1, MAX_ID) : null;
-    const precio = Number(b.precio);
-    const stock_minimo = entero(b.stock_minimo ?? 0, 0, 1000000);
-
-    if (!codigo || codigo.length > 60) return { error: "El código es obligatorio (máximo 60 caracteres)." };
-    if (nombre.length < 2 || nombre.length > 160) return { error: "El nombre debe tener entre 2 y 160 caracteres." };
-    if (descripcion && descripcion.length > 2000) return { error: "La descripción es demasiado larga." };
-    if (unidad.length > 30) return { error: "La unidad de medida es demasiado larga." };
-    if (!id_categoria) return { error: "Elige una categoría." };
-    if (b.id_ubicacion && !id_ubicacion) return { error: "Ubicación no válida." };
-    if (!Number.isFinite(precio) || precio < 0 || precio > 99999999) return { error: "Precio no válido." };
-    if (stock_minimo === null) return { error: "El stock mínimo no es válido." };
-
-    return {
-        datos: {
-            codigo, nombre, descripcion, unidad, id_categoria, id_ubicacion,
-            precio: Math.round(precio * 100) / 100, stock_minimo
-        }
-    };
-}
-
-function errorProducto(err, res) {
-    if (err.code === "ER_DUP_ENTRY")
-        return res.status(409).json({ error: "Ya existe un producto con ese código." });
-    if (err.code === "ER_NO_REFERENCED_ROW_2")
-        return res.status(400).json({ error: "La categoría o la ubicación no existe." });
-    console.error(err);
-    return res.status(500).json({ error: "Error del servidor. Intenta más tarde." });
-}
-
-app.get("/api/admin/productos", requiereRol(...PERSONAL), async (req, res) => {
-    try {
-        const [rows] = await pool.query(
-            `SELECT p.id_producto AS id, p.codigo_producto AS codigo, p.nombre, p.descripcion,
-                    p.id_categoria, c.nombre AS categoria,
-                    p.id_ubicacion, u.codigo AS ubicacion,
-                    p.precio, p.stock AS existencia, p.stock_minimo AS minimo,
-                    p.unidad_medida AS unidad, p.activo
-             FROM productos p
-             JOIN categorias c ON c.id_categoria = p.id_categoria
-             LEFT JOIN ubicaciones u ON u.id_ubicacion = p.id_ubicacion
-             ORDER BY p.nombre`
-        );
-        res.json(rows.map(r => ({ ...r, precio: Number(r.precio), activo: !!r.activo })));
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Error del servidor." });
-    }
-});
-
-app.post("/api/admin/productos", requiereRol(...PERSONAL), async (req, res) => {
-    const body = req.body ?? {};
-    const { error, datos } = leerProducto(body);
-    if (error) return res.status(400).json({ error });
-    const stockInicial = entero(body.stock ?? 0, 0, 1000000);
-    if (stockInicial === null) return res.status(400).json({ error: "Las existencias iniciales no son válidas." });
-
-    const conn = await pool.getConnection();
-    try {
-        await conn.beginTransaction();
-        const [r] = await conn.execute(
-            `INSERT INTO productos
-               (codigo_producto, nombre, descripcion, id_categoria, id_ubicacion,
-                precio, stock, stock_minimo, unidad_medida)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [datos.codigo, datos.nombre, datos.descripcion, datos.id_categoria, datos.id_ubicacion,
-             datos.precio, stockInicial, datos.stock_minimo, datos.unidad]
-        );
-        if (stockInicial > 0) {
-            await conn.execute(
-                `INSERT INTO movimientos_inventario
-                   (id_producto, id_usuario, tipo_movimiento, cantidad, stock_anterior, stock_nuevo, motivo)
-                 VALUES (?, ?, 'ENTRADA', ?, 0, ?, 'Existencias iniciales')`,
-                [r.insertId, req.usuario.id, stockInicial, stockInicial]
-            );
-        }
-        await conn.commit();
-        res.status(201).json({ id: r.insertId });
-    } catch (err) {
-        await conn.rollback();
-        errorProducto(err, res);
-    } finally {
-        conn.release();
-    }
-});
-
-app.put("/api/admin/productos/:id", requiereRol(...PERSONAL), async (req, res) => {
-    const id = entero(req.params.id, 1, MAX_ID);
-    if (!id) return res.status(400).json({ error: "Producto no válido." });
-    const { error, datos } = leerProducto(req.body ?? {});
-    if (error) return res.status(400).json({ error });
-
-    try {
-        const [r] = await pool.execute(
-            `UPDATE productos
-             SET codigo_producto = ?, nombre = ?, descripcion = ?, id_categoria = ?,
-                 id_ubicacion = ?, precio = ?, stock_minimo = ?, unidad_medida = ?
-             WHERE id_producto = ?`,
-            [datos.codigo, datos.nombre, datos.descripcion, datos.id_categoria,
-             datos.id_ubicacion, datos.precio, datos.stock_minimo, datos.unidad, id]
-        );
-        if (r.affectedRows === 0) return res.status(404).json({ error: "El producto no existe." });
-        res.json({ mensaje: "Producto actualizado" });
-    } catch (err) {
-        errorProducto(err, res);
-    }
-});
-
-const TIPOS_SUMA = ["ENTRADA", "AJUSTE_POSITIVO"];
-const TIPOS_RESTA = ["SALIDA", "AJUSTE_NEGATIVO"];
-
-app.post("/api/admin/productos/:id/movimiento", requiereRol(...PERSONAL), async (req, res) => {
-    const id = entero(req.params.id, 1, MAX_ID);
-    const tipo = String(req.body?.tipo ?? "");
-    const cantidad = entero(req.body?.cantidad, 1, 1000000);
-    const motivo = String(req.body?.motivo ?? "").trim().slice(0, 255) || null;
-
-    if (!id) return res.status(400).json({ error: "Producto no válido." });
-    if (![...TIPOS_SUMA, ...TIPOS_RESTA].includes(tipo)) return res.status(400).json({ error: "Tipo de movimiento no válido." });
-    if (!cantidad) return res.status(400).json({ error: "La cantidad debe ser un número entero mayor a 0." });
-
-    const conn = await pool.getConnection();
-    try {
-        await conn.beginTransaction();
-
-        // FOR UPDATE bloquea la fila: evita que dos personas cambien el stock a la vez
-        const [rows] = await conn.execute("SELECT stock FROM productos WHERE id_producto = ? FOR UPDATE", [id]);
-        if (!rows[0]) { await conn.rollback(); return res.status(404).json({ error: "El producto no existe." }); }
-
-        const anterior = rows[0].stock;
-        const nuevo = TIPOS_SUMA.includes(tipo) ? anterior + cantidad : anterior - cantidad;
-        if (nuevo < 0) {
-            await conn.rollback();
-            return res.status(400).json({ error: `No hay suficientes existencias (actuales: ${anterior}).` });
-        }
-
-        await conn.execute("UPDATE productos SET stock = ? WHERE id_producto = ?", [nuevo, id]);
-        await conn.execute(
-            `INSERT INTO movimientos_inventario
-               (id_producto, id_usuario, tipo_movimiento, cantidad, stock_anterior, stock_nuevo, motivo)
-             VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [id, req.usuario.id, tipo, cantidad, anterior, nuevo, motivo]
-        );
-        await conn.commit();
-        res.json({ existencia: nuevo });
-    } catch (err) {
-        await conn.rollback();
-        console.error(err);
-        res.status(500).json({ error: "Error del servidor. Intenta más tarde." });
-    } finally {
-        conn.release();
-    }
-});
-
-app.patch("/api/admin/productos/:id/activo", requiereRol("DUENO"), async (req, res) => {
-    const id = entero(req.params.id, 1, MAX_ID);
-    if (!id || typeof req.body?.activo !== "boolean") return res.status(400).json({ error: "Datos no válidos." });
-    try {
-        const [r] = await pool.execute("UPDATE productos SET activo = ? WHERE id_producto = ?", [req.body.activo, id]);
-        if (r.affectedRows === 0) return res.status(404).json({ error: "El producto no existe." });
-        res.json({ activo: req.body.activo });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Error del servidor." });
-    }
-});
-
-app.get("/api/admin/categorias", requiereRol(...PERSONAL), async (req, res) => {
-    try {
-        const [rows] = await pool.query("SELECT id_categoria AS id, nombre FROM categorias WHERE activa = TRUE ORDER BY nombre");
-        res.json(rows);
-    } catch (err) { console.error(err); res.status(500).json({ error: "Error del servidor." }); }
-});
-
-app.post("/api/admin/categorias", requiereRol(...PERSONAL), async (req, res) => {
-    const nombre = String(req.body?.nombre ?? "").trim();
-    if (nombre.length < 2 || nombre.length > 100) return res.status(400).json({ error: "El nombre debe tener entre 2 y 100 caracteres." });
-    try {
-        const [r] = await pool.execute("INSERT INTO categorias (nombre) VALUES (?)", [nombre]);
-        res.status(201).json({ id: r.insertId, nombre });
-    } catch (err) {
-        if (err.code === "ER_DUP_ENTRY") return res.status(409).json({ error: "Esa categoría ya existe." });
-        console.error(err); res.status(500).json({ error: "Error del servidor." });
-    }
-});
-
-app.get("/api/admin/ubicaciones", requiereRol(...PERSONAL), async (req, res) => {
-    try {
-        const [rows] = await pool.query("SELECT id_ubicacion AS id, codigo FROM ubicaciones WHERE activa = TRUE ORDER BY codigo");
-        res.json(rows);
-    } catch (err) { console.error(err); res.status(500).json({ error: "Error del servidor." }); }
-});
-
-function componente(valor, letra) {
-    const v = String(valor ?? "").trim().toUpperCase();
-    if (!/^[A-Z0-9]{1,10}$/.test(v)) return null;
-    return /^\d+$/.test(v) ? letra + v : v;
-}
-
-app.post("/api/admin/ubicaciones", requiereRol(...PERSONAL), async (req, res) => {
-    const pasillo = componente(req.body?.pasillo, "P");
-    const anaquel = componente(req.body?.anaquel, "A");
-    const estante = componente(req.body?.estante, "E");
-    if (!pasillo || !anaquel || !estante)
-        return res.status(400).json({ error: "Escribe pasillo, anaquel y estante (por ejemplo 1,2,3)." });
-    const codigo = `${pasillo}-${anaquel}-${estante}`;
-    try {
-        const [r] = await pool.execute(
-            "INSERT INTO ubicaciones (pasillo, anaquel, estante, codigo) VALUES (?, ?, ?, ?)",
-            [pasillo, anaquel, estante, codigo]
-        );
-        res.status(201).json({ id: r.insertId, codigo });
-    } catch (err) {
-        if (err.code === "ER_DUP_ENTRY") return res.status(409).json({ error: "Esa ubicación ya existe." });
-        console.error(err); res.status(500).json({ error: "Error del servidor." });
-    }
-});
-
+/* ---------- Archivos de la web ---------- */
 app.use(express.static(path.join(__dirname, "public")));
 
 const PORT = process.env.PORT || 3000;
