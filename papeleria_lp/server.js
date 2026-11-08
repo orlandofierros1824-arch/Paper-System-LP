@@ -13,7 +13,7 @@ const app = express();
 const PROD = process.env.NODE_ENV === "production";
 
 app.set("trust proxy", 1); // necesario detrás del proxy de Render
-/* ---------- Sesión actual ---------- */
+/* ---------- Sesión actual ---------- intento antiguao*/
 app.get("/api/me", async (req, res) => {
     try {
         const t = jwt.verify(req.cookies?.piwis_token, process.env.JWT_SECRET);
