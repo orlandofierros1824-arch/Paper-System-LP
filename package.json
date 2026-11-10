@@ -1,0 +1,41 @@
+
+{
+  "name": "paper-system-lp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "> **Seminario de Integración: Desarrollo** · [ENG VERSION]",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "npm run test:unit",
+    "test:unit": "jest tests/unit --passWithNoTests",
+    "test:integration": "jest tests/integration --passWithNoTests",
+    "test:e2e": "playwright test"
+  },
+  "jest": {
+    "testMatch": [
+      "<rootDir>/tests/unit/**/*.test.js",
+      "<rootDir>/tests/integration/**/*.test.js"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/orlandofierros1824-arch/Paper-System-LP.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/orlandofierros1824-arch/Paper-System-LP/issues"
+  },
+  "homepage": "https://github.com/orlandofierros1824-arch/Paper-System-LP#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.65.0",
+    "http-server": "^14.1.1",
+    "jest": "^30.5.2"
+  }
+}
