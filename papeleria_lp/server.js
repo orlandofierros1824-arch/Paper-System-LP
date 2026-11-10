@@ -178,11 +178,13 @@ app.post("/api/logout", (req, res) => {
 app.get("/api/productos", async (req, res) => {
     try {
         const [rows] = await pool.query(
-            `SELECT producto AS nombre, categoria, codigo_ubicacion AS ubicacion,
+            `SELECT codigo_producto AS codigo, producto AS nombre, categoria, precio,
+                    codigo_ubicacion AS ubicacion,
                     stock AS existencia, unidad_medida AS unidad, stock_minimo AS minimo
              FROM vw_inventario WHERE activo = TRUE ORDER BY producto`
         );
-        res.json(rows);
+        // DECIMAL llega como texto: se convierte a número
+        res.json(rows.map(r => ({ ...r, precio: Number(r.precio) })));
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Error del servidor." });
