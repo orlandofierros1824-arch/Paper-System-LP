@@ -172,17 +172,23 @@ app.post("/api/logout", (req, res) => {
 });
 
 /* ==========================================================================
-   PRODUCTOS PÚBLICOS (sin cambios): solo los activos, para el inventario
+   PRODUCTOS PÚBLICOS: solo los activos, para el inventario (lee las tablas, no la vista)
    ========================================================================== */
 
 app.get("/api/productos", async (req, res) => {
     try {
         const [rows] = await pool.query(
-            `SELECT producto AS nombre, categoria, codigo_ubicacion AS ubicacion,
-                    stock AS existencia, unidad_medida AS unidad, stock_minimo AS minimo
-             FROM vw_inventario WHERE activo = TRUE ORDER BY producto`
+            `SELECT p.codigo_producto AS codigo, p.nombre, c.nombre AS categoria, p.precio,
+                    u.codigo AS ubicacion, p.stock AS existencia,
+                    p.unidad_medida AS unidad, p.stock_minimo AS minimo
+             FROM productos p
+             JOIN categorias c ON c.id_categoria = p.id_categoria
+             LEFT JOIN ubicaciones u ON u.id_ubicacion = p.id_ubicacion
+             WHERE p.activo = TRUE
+             ORDER BY p.nombre`
         );
-        res.json(rows);
+        // DECIMAL llega como texto: se convierte a número
+        res.json(rows.map(r => ({ ...r, precio: Number(r.precio) })));
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Error del servidor." });

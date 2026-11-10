@@ -141,12 +141,12 @@ input.addEventListener("input", render);
 async function cargarProductos() {
     try {
         const res = await fetch(API_PRODUCTOS);
-        if (!res.ok) throw new Error(res.status);
+        if (!res.ok) throw new Error("error " + res.status);
         productos = await res.json();
         mensaje("");
     } catch (err) {
         productos = [];
-        mensaje("No se pudo conectar con la base de datos. Revisa que el servidor esté activo.");
+        mensaje("No se pudieron cargar los productos (" + err.message + "). Revisa que el servidor y la base de datos estén activos.");
     }
     renderCategorias();
     render();
