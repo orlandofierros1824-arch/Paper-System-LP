@@ -63,11 +63,13 @@ Paper-System-LP/
 │
 ├── tests/
 │   ├──Papeleria-System-LP_repository_architecture ←(este archivo)
-│   ├── unit/
-│   ├── integration/
+│   ├── unit/.gitkeep  
+│   ├── integration/enlaces-archivos.test.js
 │   ├── acceptance/
-│   └── e2e/ 
+│   └── e2e/pantallas.spec.js  
 │   └── README.md
+|
+├── playwright.config.js   
 │
 ├── .gitignore
 └── README.md
