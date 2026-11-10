@@ -1,0 +1,73 @@
+Paper-System-LP/
+├── .github/
+│   └── workflows/
+│       └── CI.yml ← (todavia no tiene nada)
+│
+├── base_datos/
+│   └── Papeleria_Los_Piwis_Final.sql
+│
+├── config/
+│   └── db.js
+│
+├── docs/
+│   ├──ADR'S/
+│      ├──ADR-001.md
+│      └── ADR-002.md
+│   ├──BL'S/
+│      ├──bl-01.md 
+│                   ← (siguiendo la estructura, hasta el 8)
+│      └── bl-08.md
+│   ├──DT'S/
+│      ├──Dt-001.md
+│                   ← (siguiendo la estructura, hasta el 5)
+│      └── Dt-005.md
+│   ├──TEST'S/
+│      ├──TEST-01.md
+│      ├──TEST-02.md
+│      └── TEST-03.md
+│   ├──ADR's Resumen.md
+│   ├──Deudas_Tecnicas_Resumen.md
+│   └──resumen_de_registros_de_bloqueos.md
+|
+├── JSON_delErik/ ←(esta carpeta no es funcional pero se queda en el repo para la contribucion)
+|
+├── papeleria_lp/
+│   ├──public/
+│      ├──auth.css
+│      ├──auth.js
+│      ├──index.html
+│      ├──login.html
+│      ├──perfil_usuario.html
+│      ├──perfil.css
+│      ├──perfil.html
+│      ├──perfil.js
+│      ├──productos.css
+│      ├──productos.html
+│      ├──productos.js
+│      ├──scripts.js
+│      └──style.css
+│   ├──.gitignore
+│   ├──ca.pem
+│   ├──package-lock.json
+│   ├──package.json
+│   └──server.js
+│
+├── papeleria_LP_Web/
+│   ├──auth.css
+│   ├──auth.js
+│   ├──index.html
+│   ├──login.html
+│   ├──script.js
+│   ├──server.js
+│   └──style.css
+│
+├── tests/
+│   ├──Papeleria-System-LP_repository_architecture ←(este archivo)
+│   ├── unit/
+│   ├── integration/
+│   ├── acceptance/
+│   └── e2e/ 
+│   └── README.md
+│
+├── .gitignore
+└── README.md
