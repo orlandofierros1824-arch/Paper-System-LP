@@ -1,4 +1,99 @@
 /* ==========================================================================
+   ARCHIVO: script.js  (página pública: index.html)
+   QUÉ HACE: da vida a la página. Tiene cuatro partes:
+     1. CONFIGURACIÓN  -> imágenes del carrusel y dirección de los productos
+     2. CARRUSEL       -> cambia las imágenes automáticamente
+     3. INVENTARIO     -> pide los productos al servidor y los muestra como
+                          tarjetas, con categorías, buscador y filtros
+     4. SESIÓN         -> cambia solo el enlace "Iniciar sesión" / "Mi perfil"
+   SE CONECTA CON:
+     - index.html -> busca elementos por su id (carousel, productList, etc.)
+     - El servidor -> /api/productos (productos) y /api/me (sesión)
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. CONFIGURACIÓN
+   ========================================================================== */
+
+/* IMÁGENES DEL CARRUSEL
+   src = ruta del archivo (en la carpeta "img"), titulo y texto = lo que se
+   escribe sobre la imagen. Para agregar una, copia una línea y cámbiala. */
+const SLIDES = [
+    { src: "img/slide1.jpg", titulo: "Todo para la escuela y la oficina", texto: "Cuadernos, papel y escritura en un solo lugar." },
+    { src: "img/slide2.jpg", titulo: "Encuentra cada producto",           texto: "Pasillo, anaquel y estante al instante." },
+    { src: "img/slide3.jpg", titulo: "Inventario siempre al día",         texto: "Detecta lo que necesita reposición." }
+];
+
+/* RUTA DEL SERVIDOR QUE ENTREGA LOS PRODUCTOS (lee la base de datos) */
+const API_PRODUCTOS = "/api/productos";
+
+
+/* ==========================================================================
+   2. CARRUSEL
+   Lee: #carousel, #slides, #dots (de index.html)
+   ========================================================================== */
+
+const carousel  = document.getElementById("carousel");
+const slidesBox = document.getElementById("slides");
+const dotsBox   = document.getElementById("dots");
+
+// Tiempo entre imágenes: sale de data-interval en index.html (milisegundos)
+const intervalo = Number(carousel.dataset.interval) || 5000;
+
+let actual = 0;    // número de la imagen visible (0 = la primera)
+let timer = null;  // temporizador del cambio automático
+
+// Crea una diapositiva y un puntito por cada imagen de SLIDES
+SLIDES.forEach((s, i) => {
+    const slide = document.createElement("figure");
+    slide.className = "slide" + (i === 0 ? " active" : "");
+    slide.style.backgroundImage = `url("${s.src}")`;
+
+    const cap = document.createElement("figcaption");
+    const h = document.createElement("strong");
+    const p = document.createElement("span");
+    h.textContent = s.titulo;
+    p.textContent = s.texto;
+    cap.append(h, p);
+    slide.append(cap);
+    slidesBox.append(slide);
+
+    const dot = document.createElement("button");
+    dot.type = "button";
+    dot.className = "dot" + (i === 0 ? " active" : "");
+    dot.setAttribute("aria-label", `Ir a la imagen ${i + 1}`);
+    dot.addEventListener("click", () => { irA(i); reiniciar(); });
+    dotsBox.append(dot);
+});
+
+// Muestra la imagen n (después de la última vuelve a la primera)
+function irA(n) {
+    const slides = slidesBox.children;
+    const dots = dotsBox.children;
+    slides[actual].classList.remove("active");
+    dots[actual].classList.remove("active");
+    actual = (n + slides.length) % slides.length;
+    slides[actual].classList.add("active");
+    dots[actual].classList.add("active");
+}
+
+function iniciar()   { timer = setInterval(() => irA(actual + 1), intervalo); }
+function detener()   { clearInterval(timer); }
+function reiniciar() { detener(); iniciar(); }
+
+carousel.querySelector(".prev").addEventListener("click", () => { irA(actual - 1); reiniciar(); });
+carousel.querySelector(".next").addEventListener("click", () => { irA(actual + 1); reiniciar(); });
+
+// Se pausa con el mouse encima y se reanuda al salir
+carousel.addEventListener("mouseenter", detener);
+carousel.addEventListener("mouseleave", iniciar);
+
+// Si el dispositivo pide "reducir movimiento", no avanza solo
+if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) iniciar();
+
+
+/* ==========================================================================
    3. INVENTARIO
    Pide los productos a la base de datos (API_PRODUCTOS) y los muestra como
    tarjetas. Las categorías se generan solas a partir de los productos.
