@@ -71,6 +71,7 @@ function mostrarPerfil(u) {
     // El acceso a administración solo se ofrece a dueño y empleados.
     // (El servidor igual lo protege: esto es solo para no mostrar un enlace inútil.)
     $("adminLink").hidden = !["DUENO", "EMPLEADO"].includes(u.rol);
+    $("usuariosLink").hidden = u.rol !== "DUENO";
 }
 
 /* ==========================================================================
