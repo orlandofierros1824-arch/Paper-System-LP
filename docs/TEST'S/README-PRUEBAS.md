@@ -26,9 +26,9 @@ Por lo tanto, no debe describirse como una ejecución automática después de cu
 
 | ID | Tipo | Caso | Archivo |
 |---|---|---|---|
-| TEST-01 | Unitaria | Registro de usuarios | [TEST-01](TEST-01-unitarias/TEST-01-registro-usuarios.md) |
-| TEST-02 | Integración | Verificación de referencias entre archivos de la interfaz | [TEST-02](TEST-02-integracion/TEST-02-referencias-archivos.md) |
-| TEST-03 | Aceptación / E2E | Carga de pantallas principales en el navegador | [TEST-03](TEST-03-aceptacion-e2e/TEST-03-carga-pantallas.md) |
+| TEST-01 | Unitaria | Registro de usuarios | [TEST-01] |
+| TEST-02 | Integración | Verificación de referencias entre archivos de la interfaz | [TEST-02] |
+| TEST-03 | Aceptación / E2E | Carga de pantallas principales en el navegador | [TEST-03] |
 
 ## 5. Consideraciones sobre los resultados
 
