@@ -96,7 +96,7 @@ function requiereRol(...roles) {
 app.get("/api/me", async (req, res) => {
     const u = await usuarioActual(req);
     if (!u) return res.status(401).json({ error: "Sin sesión" });
-    res.json({ nombre: u.nombre, rol: u.rol });
+    res.json({ id: u.id, nombre: u.nombre, rol: u.rol });
 });
 
 /* ==========================================================================
@@ -178,7 +178,7 @@ app.post("/api/logout", (req, res) => {
 app.get("/api/productos", async (req, res) => {
     try {
         const [rows] = await pool.query(
-            `SELECT p.codigo_producto AS codigo, p.nombre, c.nombre AS categoria, p.precio,
+            `SELECT p.id_producto AS id, p.codigo_producto AS codigo, p.nombre, c.nombre AS categoria, p.precio,
                     u.codigo AS ubicacion, p.stock AS existencia,
                     p.unidad_medida AS unidad, p.stock_minimo AS minimo
              FROM productos p
