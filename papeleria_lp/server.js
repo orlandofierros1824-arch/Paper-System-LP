@@ -542,7 +542,7 @@ const TODOS = ["DUENO", "EMPLEADO", "CLIENTE"];
 app.get("/api/perfil", requiereRol(...TODOS), async (req, res) => {
     try {
         const [rows] = await pool.execute(
-            `SELECT u.nombre, u.correo, r.codigo AS rol, r.nombre AS rol_nombre, u.fecha_creacion
+            `SELECT u.id_usuario AS id, u.nombre, u.correo, r.codigo AS rol, r.nombre AS rol_nombre, u.fecha_creacion
              FROM usuarios u JOIN roles r ON r.id_rol = u.id_rol
              WHERE u.id_usuario = ?`,
             [req.usuario.id]
@@ -555,29 +555,24 @@ app.get("/api/perfil", requiereRol(...TODOS), async (req, res) => {
     }
 });
 
-/* Cambiar mi nombre (el correo y el rol NO se pueden cambiar desde aquí) */
-app.put("/api/perfil", requiereRol(...TODOS), async (req, res) => {
-    const nombre = String(req.body?.nombre ?? "").trim();
-    if (nombre.length < 3 || nombre.length > 120)
-        return res.status(400).json({ error: "Escribe tu nombre completo (3 a 120 caracteres)." });
+/* Modificar mis datos: nombre, correo y (opcional) contraseña nueva.
+   Siempre exige la contraseña ACTUAL, para que nadie con una sesión abierta
+   ajena pueda cambiar el correo o la clave. */
+app.put("/api/perfil", limiteAuth, requiereRol(...TODOS), async (req, res) => {
     try {
-        await pool.execute("UPDATE usuarios SET nombre = ? WHERE id_usuario = ?", [nombre, req.usuario.id]);
-        res.json({ nombre });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Error del servidor." });
-    }
-});
+        const b = req.body ?? {};
+        const nombre = String(b.nombre ?? "").trim();
+        const correo = String(b.correo ?? "").trim().toLowerCase();
+        const actual = String(b.actual ?? "");
+        const nueva = String(b.nueva ?? "");
 
-/* Cambiar mi contraseña: exige la contraseña actual */
-app.put("/api/perfil/password", limiteAuth, requiereRol(...TODOS), async (req, res) => {
-    try {
-        const actual = String(req.body?.actual ?? "");
-        const nueva = String(req.body?.nueva ?? "");
-
-        if (nueva.length < 8 || nueva.length > 72 || !/[A-Za-z]/.test(nueva) || !/\d/.test(nueva))
+        if (nombre.length < 3 || nombre.length > 120)
+            return res.status(400).json({ error: "Escribe tu nombre completo (3 a 120 caracteres)." });
+        if (!EMAIL_VALIDO.test(correo) || correo.length > 190)
+            return res.status(400).json({ error: "Correo electrónico no válido." });
+        if (nueva && (nueva.length < 8 || nueva.length > 72 || !/[A-Za-z]/.test(nueva) || !/\d/.test(nueva)))
             return res.status(400).json({ error: "La nueva contraseña debe tener al menos 8 caracteres, con letras y números." });
-        if (nueva === actual)
+        if (nueva && nueva === actual)
             return res.status(400).json({ error: "La nueva contraseña debe ser distinta a la actual." });
 
         const [rows] = await pool.execute("SELECT password_hash FROM usuarios WHERE id_usuario = ?", [req.usuario.id]);
@@ -585,9 +580,37 @@ app.put("/api/perfil/password", limiteAuth, requiereRol(...TODOS), async (req, r
         // Se responde 400 (y no 401) para que la pantalla no crea que la sesión expiró
         if (!ok) return res.status(400).json({ error: "La contraseña actual no es correcta." });
 
-        const hash = await bcrypt.hash(nueva, 12);
-        await pool.execute("UPDATE usuarios SET password_hash = ? WHERE id_usuario = ?", [hash, req.usuario.id]);
-        res.json({ mensaje: "Contraseña actualizada" });
+        if (nueva) {
+            const hash = await bcrypt.hash(nueva, 12);
+            await pool.execute("UPDATE usuarios SET nombre = ?, correo = ?, password_hash = ? WHERE id_usuario = ?",
+                [nombre, correo, hash, req.usuario.id]);
+        } else {
+            await pool.execute("UPDATE usuarios SET nombre = ?, correo = ? WHERE id_usuario = ?",
+                [nombre, correo, req.usuario.id]);
+        }
+        res.json({ nombre, correo });
+    } catch (err) {
+        if (err.code === "ER_DUP_ENTRY") return res.status(409).json({ error: "Ese correo ya está registrado." });
+        console.error(err);
+        res.status(500).json({ error: "Error del servidor. Intenta más tarde." });
+    }
+});
+
+/* Eliminar mi cuenta (solo CLIENTES). No se borra la fila: se DESACTIVA, porque
+   los pedidos y ventas dependen de ella. Deja de poder iniciar sesión y el
+   dueño puede reactivarla desde la pantalla de usuarios.
+   El dueño y los empleados no pueden hacerlo: sus cuentas las administra el dueño. */
+app.post("/api/perfil/eliminar", limiteAuth, requiereRol("CLIENTE"), async (req, res) => {
+    try {
+        if (String(req.body?.confirmar ?? "") !== "ELIMINAR")
+            return res.status(400).json({ error: "Escribe ELIMINAR para confirmar." });
+        const [rows] = await pool.execute("SELECT password_hash FROM usuarios WHERE id_usuario = ?", [req.usuario.id]);
+        const ok = rows[0] && await bcrypt.compare(String(req.body?.password ?? ""), rows[0].password_hash);
+        if (!ok) return res.status(400).json({ error: "La contraseña no es correcta." });
+
+        await pool.execute("UPDATE usuarios SET activo = FALSE WHERE id_usuario = ?", [req.usuario.id]);
+        res.clearCookie("piwis_token");
+        res.json({ mensaje: "Cuenta eliminada" });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Error del servidor. Intenta más tarde." });
