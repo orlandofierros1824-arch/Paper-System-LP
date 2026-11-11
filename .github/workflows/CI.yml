@@ -9,7 +9,7 @@ on:
 
 jobs:
   unit-integration:
-    name: Unitarias (integración pendiente)
+    name: Unitarias e integración
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,9 +22,7 @@ jobs:
       - run: npm ci
       - run: npm run test:unit
 
-      # TODO: Reactivar cuando el equipo termine
-      # las referencias HTML y los archivos JS pendientes.
-      # - run: npm run test:integration
+      - run: npm run test:integration
 
   acceptance:
     name: Aceptación y E2E (navegador)
