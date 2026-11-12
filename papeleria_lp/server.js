@@ -96,7 +96,7 @@ function requiereRol(...roles) {
 app.get("/api/me", async (req, res) => {
     const u = await usuarioActual(req);
     if (!u) return res.status(401).json({ error: "Sin sesión" });
-    res.json({ nombre: u.nombre, rol: u.rol });
+    res.json({ id: u.id, nombre: u.nombre, rol: u.rol });
 });
 
 /* ==========================================================================
@@ -172,17 +172,23 @@ app.post("/api/logout", (req, res) => {
 });
 
 /* ==========================================================================
-   PRODUCTOS PÚBLICOS (sin cambios): solo los activos, para el inventario
+   PRODUCTOS PÚBLICOS: solo los activos, para el inventario (lee las tablas, no la vista)
    ========================================================================== */
 
 app.get("/api/productos", async (req, res) => {
     try {
         const [rows] = await pool.query(
-            `SELECT producto AS nombre, categoria, codigo_ubicacion AS ubicacion,
-                    stock AS existencia, unidad_medida AS unidad, stock_minimo AS minimo
-             FROM vw_inventario WHERE activo = TRUE ORDER BY producto`
+            `SELECT p.id_producto AS id, p.codigo_producto AS codigo, p.nombre, c.nombre AS categoria, p.precio,
+                    u.codigo AS ubicacion, p.stock AS existencia,
+                    p.unidad_medida AS unidad, p.stock_minimo AS minimo
+             FROM productos p
+             JOIN categorias c ON c.id_categoria = p.id_categoria
+             LEFT JOIN ubicaciones u ON u.id_ubicacion = p.id_ubicacion
+             WHERE p.activo = TRUE
+             ORDER BY p.nombre`
         );
-        res.json(rows);
+        // DECIMAL llega como texto: se convierte a número
+        res.json(rows.map(r => ({ ...r, precio: Number(r.precio) })));
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Error del servidor." });
@@ -262,8 +268,8 @@ app.get("/api/admin/productos", requiereRol(...PERSONAL), async (req, res) => {
     }
 });
 
-/* ---------- Crear producto (con existencias iniciales opcionales) ---------- */
-app.post("/api/admin/productos", requiereRol(...PERSONAL), async (req, res) => {
+/* ---------- Crear producto (solo el JEFE; con existencias iniciales opcionales) ---------- */
+app.post("/api/admin/productos", requiereRol("DUENO"), async (req, res) => {
     const body = req.body ?? {};
     const { error, datos } = leerProducto(body);
     if (error) return res.status(400).json({ error });
@@ -304,6 +310,22 @@ app.post("/api/admin/productos", requiereRol(...PERSONAL), async (req, res) => {
 app.put("/api/admin/productos/:id", requiereRol(...PERSONAL), async (req, res) => {
     const id = entero(req.params.id, 1, MAX_ID);
     if (!id) return res.status(400).json({ error: "Producto no válido." });
+
+    // EMPLEADO: solo puede cambiar la ubicación (organización del almacén).
+    // Precio, nombre, código, categoría y mínimo quedan reservados al jefe.
+    if (req.usuario.rol === "EMPLEADO") {
+        const idUbicacion = req.body?.id_ubicacion ? entero(req.body.id_ubicacion, 1, MAX_ID) : null;
+        if (req.body?.id_ubicacion && !idUbicacion) return res.status(400).json({ error: "Ubicación no válida." });
+        try {
+            const [r] = await pool.execute("UPDATE productos SET id_ubicacion = ? WHERE id_producto = ?", [idUbicacion, id]);
+            if (r.affectedRows === 0) return res.status(404).json({ error: "El producto no existe." });
+            return res.json({ mensaje: "Ubicación actualizada" });
+        } catch (err) {
+            return errorProducto(err, res);
+        }
+    }
+
+    // DUENO: edita todo
     const { error, datos } = leerProducto(req.body ?? {});
     if (error) return res.status(400).json({ error });
 
@@ -395,7 +417,7 @@ app.get("/api/admin/categorias", requiereRol(...PERSONAL), async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: "Error del servidor." }); }
 });
 
-app.post("/api/admin/categorias", requiereRol(...PERSONAL), async (req, res) => {
+app.post("/api/admin/categorias", requiereRol("DUENO"), async (req, res) => {
     const nombre = String(req.body?.nombre ?? "").trim();
     if (nombre.length < 2 || nombre.length > 100) return res.status(400).json({ error: "El nombre debe tener entre 2 y 100 caracteres." });
     try {
@@ -441,6 +463,74 @@ app.post("/api/admin/ubicaciones", requiereRol(...PERSONAL), async (req, res) =>
 });
 
 /* ==========================================================================
+   USUARIOS (solo el DUEÑO)
+   El jefe ve las cuentas, convierte clientes en empleados (o al revés) y
+   desactiva cuentas. Reglas de seguridad:
+     - No puede cambiar su propio rol ni desactivarse a sí mismo.
+     - No puede tocar a otro dueño desde aquí (ese rol se da solo en la base).
+     - Solo se pueden asignar los roles EMPLEADO y CLIENTE.
+   ========================================================================== */
+
+const ROLES_ASIGNABLES = ["EMPLEADO", "CLIENTE"];
+
+/* Busca el rol actual de un usuario (o null si no existe) */
+async function rolDe(id) {
+    const [rows] = await pool.execute(
+        `SELECT r.codigo AS rol FROM usuarios u JOIN roles r ON r.id_rol = u.id_rol WHERE u.id_usuario = ?`, [id]);
+    return rows[0]?.rol ?? null;
+}
+
+app.get("/api/admin/usuarios", requiereRol("DUENO"), async (req, res) => {
+    try {
+        const [rows] = await pool.query(
+            `SELECT u.id_usuario AS id, u.nombre, u.correo, r.codigo AS rol, r.nombre AS rol_nombre,
+                    u.activo, u.fecha_creacion
+             FROM usuarios u JOIN roles r ON r.id_rol = u.id_rol
+             ORDER BY (r.codigo = 'DUENO') DESC, u.nombre`
+        );
+        // Nunca se envía password_hash
+        res.json(rows.map(u => ({ ...u, activo: !!u.activo, es_yo: u.id === req.usuario.id })));
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Error del servidor." });
+    }
+});
+
+app.patch("/api/admin/usuarios/:id/rol", requiereRol("DUENO"), async (req, res) => {
+    const id = entero(req.params.id, 1, MAX_ID);
+    const rol = String(req.body?.rol ?? "");
+    if (!id || !ROLES_ASIGNABLES.includes(rol)) return res.status(400).json({ error: "Datos no válidos." });
+    if (id === req.usuario.id) return res.status(400).json({ error: "No puedes cambiar tu propio rol." });
+    try {
+        const actual = await rolDe(id);
+        if (!actual) return res.status(404).json({ error: "El usuario no existe." });
+        if (actual === "DUENO") return res.status(400).json({ error: "No se puede cambiar el rol de un dueño desde aquí." });
+        await pool.execute(
+            "UPDATE usuarios SET id_rol = (SELECT id_rol FROM roles WHERE codigo = ?) WHERE id_usuario = ?", [rol, id]);
+        res.json({ rol });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Error del servidor." });
+    }
+});
+
+app.patch("/api/admin/usuarios/:id/activo", requiereRol("DUENO"), async (req, res) => {
+    const id = entero(req.params.id, 1, MAX_ID);
+    if (!id || typeof req.body?.activo !== "boolean") return res.status(400).json({ error: "Datos no válidos." });
+    if (id === req.usuario.id) return res.status(400).json({ error: "No puedes desactivar tu propia cuenta." });
+    try {
+        const actual = await rolDe(id);
+        if (!actual) return res.status(404).json({ error: "El usuario no existe." });
+        if (actual === "DUENO") return res.status(400).json({ error: "No se puede desactivar a un dueño desde aquí." });
+        await pool.execute("UPDATE usuarios SET activo = ? WHERE id_usuario = ?", [req.body.activo, id]);
+        res.json({ activo: req.body.activo });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Error del servidor." });
+    }
+});
+
+/* ==========================================================================
    PERFIL (cualquier usuario con sesión: dueño, empleado o cliente)
    Cada quien solo puede ver y cambiar SU propio perfil: el id sale de la
    sesión (req.usuario.id), nunca de lo que mande el navegador.
@@ -452,7 +542,7 @@ const TODOS = ["DUENO", "EMPLEADO", "CLIENTE"];
 app.get("/api/perfil", requiereRol(...TODOS), async (req, res) => {
     try {
         const [rows] = await pool.execute(
-            `SELECT u.nombre, u.correo, r.codigo AS rol, r.nombre AS rol_nombre, u.fecha_creacion
+            `SELECT u.id_usuario AS id, u.nombre, u.correo, r.codigo AS rol, r.nombre AS rol_nombre, u.fecha_creacion
              FROM usuarios u JOIN roles r ON r.id_rol = u.id_rol
              WHERE u.id_usuario = ?`,
             [req.usuario.id]
@@ -465,29 +555,24 @@ app.get("/api/perfil", requiereRol(...TODOS), async (req, res) => {
     }
 });
 
-/* Cambiar mi nombre (el correo y el rol NO se pueden cambiar desde aquí) */
-app.put("/api/perfil", requiereRol(...TODOS), async (req, res) => {
-    const nombre = String(req.body?.nombre ?? "").trim();
-    if (nombre.length < 3 || nombre.length > 120)
-        return res.status(400).json({ error: "Escribe tu nombre completo (3 a 120 caracteres)." });
+/* Modificar mis datos: nombre, correo y (opcional) contraseña nueva.
+   Siempre exige la contraseña ACTUAL, para que nadie con una sesión abierta
+   ajena pueda cambiar el correo o la clave. */
+app.put("/api/perfil", limiteAuth, requiereRol(...TODOS), async (req, res) => {
     try {
-        await pool.execute("UPDATE usuarios SET nombre = ? WHERE id_usuario = ?", [nombre, req.usuario.id]);
-        res.json({ nombre });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Error del servidor." });
-    }
-});
+        const b = req.body ?? {};
+        const nombre = String(b.nombre ?? "").trim();
+        const correo = String(b.correo ?? "").trim().toLowerCase();
+        const actual = String(b.actual ?? "");
+        const nueva = String(b.nueva ?? "");
 
-/* Cambiar mi contraseña: exige la contraseña actual */
-app.put("/api/perfil/password", limiteAuth, requiereRol(...TODOS), async (req, res) => {
-    try {
-        const actual = String(req.body?.actual ?? "");
-        const nueva = String(req.body?.nueva ?? "");
-
-        if (nueva.length < 8 || nueva.length > 72 || !/[A-Za-z]/.test(nueva) || !/\d/.test(nueva))
+        if (nombre.length < 3 || nombre.length > 120)
+            return res.status(400).json({ error: "Escribe tu nombre completo (3 a 120 caracteres)." });
+        if (!EMAIL_VALIDO.test(correo) || correo.length > 190)
+            return res.status(400).json({ error: "Correo electrónico no válido." });
+        if (nueva && (nueva.length < 8 || nueva.length > 72 || !/[A-Za-z]/.test(nueva) || !/\d/.test(nueva)))
             return res.status(400).json({ error: "La nueva contraseña debe tener al menos 8 caracteres, con letras y números." });
-        if (nueva === actual)
+        if (nueva && nueva === actual)
             return res.status(400).json({ error: "La nueva contraseña debe ser distinta a la actual." });
 
         const [rows] = await pool.execute("SELECT password_hash FROM usuarios WHERE id_usuario = ?", [req.usuario.id]);
@@ -495,9 +580,37 @@ app.put("/api/perfil/password", limiteAuth, requiereRol(...TODOS), async (req, r
         // Se responde 400 (y no 401) para que la pantalla no crea que la sesión expiró
         if (!ok) return res.status(400).json({ error: "La contraseña actual no es correcta." });
 
-        const hash = await bcrypt.hash(nueva, 12);
-        await pool.execute("UPDATE usuarios SET password_hash = ? WHERE id_usuario = ?", [hash, req.usuario.id]);
-        res.json({ mensaje: "Contraseña actualizada" });
+        if (nueva) {
+            const hash = await bcrypt.hash(nueva, 12);
+            await pool.execute("UPDATE usuarios SET nombre = ?, correo = ?, password_hash = ? WHERE id_usuario = ?",
+                [nombre, correo, hash, req.usuario.id]);
+        } else {
+            await pool.execute("UPDATE usuarios SET nombre = ?, correo = ? WHERE id_usuario = ?",
+                [nombre, correo, req.usuario.id]);
+        }
+        res.json({ nombre, correo });
+    } catch (err) {
+        if (err.code === "ER_DUP_ENTRY") return res.status(409).json({ error: "Ese correo ya está registrado." });
+        console.error(err);
+        res.status(500).json({ error: "Error del servidor. Intenta más tarde." });
+    }
+});
+
+/* Eliminar mi cuenta (solo CLIENTES). No se borra la fila: se DESACTIVA, porque
+   los pedidos y ventas dependen de ella. Deja de poder iniciar sesión y el
+   dueño puede reactivarla desde la pantalla de usuarios.
+   El dueño y los empleados no pueden hacerlo: sus cuentas las administra el dueño. */
+app.post("/api/perfil/eliminar", limiteAuth, requiereRol("CLIENTE"), async (req, res) => {
+    try {
+        if (String(req.body?.confirmar ?? "") !== "ELIMINAR")
+            return res.status(400).json({ error: "Escribe ELIMINAR para confirmar." });
+        const [rows] = await pool.execute("SELECT password_hash FROM usuarios WHERE id_usuario = ?", [req.usuario.id]);
+        const ok = rows[0] && await bcrypt.compare(String(req.body?.password ?? ""), rows[0].password_hash);
+        if (!ok) return res.status(400).json({ error: "La contraseña no es correcta." });
+
+        await pool.execute("UPDATE usuarios SET activo = FALSE WHERE id_usuario = ?", [req.usuario.id]);
+        res.clearCookie("piwis_token");
+        res.json({ mensaje: "Cuenta eliminada" });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Error del servidor. Intenta más tarde." });

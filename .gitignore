@@ -24,3 +24,9 @@ node_modules/
 # Archivos del sistema
 .DS_Store
 Thumbs.db
+
+#Modulo de pruebas 
+node_modules/
+playwright-report/
+test-results/
+

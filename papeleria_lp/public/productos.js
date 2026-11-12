@@ -15,6 +15,8 @@
      GET   /api/admin/categorias, POST /api/admin/categorias
      GET   /api/admin/ubicaciones, POST /api/admin/ubicaciones
      POST  /api/logout                      -> cerrar sesión
+   PERMISOS: el jefe (DUENO) crea, edita (incluido el precio) y desactiva productos.
+   El EMPLEADO registra movimientos de existencias y solo puede cambiar la ubicación.
    La seguridad real está en el servidor: aunque alguien manipule esta
    página, el servidor vuelve a revisar sesión y rol en cada petición.
    ========================================================================== */
@@ -113,7 +115,7 @@ function render() {
 
     if (!visibles.length) {
         const tr = document.createElement("tr");
-        const td = celda(productos.length ? "Ningún producto coincide con la búsqueda." : "Aún no hay productos. Crea el primero con «Nuevo producto».", "muted");
+        const td = celda(productos.length ? "Ningún producto coincide con la búsqueda." : (esDueno ? "Aún no hay productos. Crea el primero con «Nuevo producto»." : "Aún no hay productos registrados."), "muted");
         td.colSpan = 8;
         td.style.textAlign = "center";
         td.style.padding = "28px";
@@ -219,6 +221,14 @@ function abrirProducto(p) {
     $("dlgProductoTitulo").textContent = p ? "Editar producto" : "Nuevo producto";
     // Las existencias iniciales solo se piden al crear; después se usan los movimientos
     $("stockField").hidden = !!p;
+
+    // Permisos: el jefe edita todo; el empleado solo puede cambiar la ubicación
+    const soloUbicacion = !esDueno;
+    formProducto.querySelectorAll("input, textarea, select").forEach(c => {
+        c.disabled = soloUbicacion && c.name !== "id_ubicacion";
+    });
+    $("nuevaCatBtn").hidden = !esDueno;
+    if (soloUbicacion) $("dlgProductoTitulo").textContent = "Cambiar ubicación";
 
     if (p) {
         formProducto.codigo.value = p.codigo;
@@ -374,7 +384,9 @@ $("logoutBtn").addEventListener("click", async () => {
             return;
         }
         esDueno = datos.rol === "DUENO";
-        $("nuevoBtn").hidden = false;
+        // Solo el jefe crea productos y administra usuarios
+        $("nuevoBtn").hidden = !esDueno;
+        $("usuariosLink").hidden = !esDueno;
 
         await cargarCatalogos();
         await cargarProductos();

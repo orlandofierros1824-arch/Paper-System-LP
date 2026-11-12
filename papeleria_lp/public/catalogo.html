@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<!--
+  ARCHIVO: catalogo.html  ·  CATÁLOGO DE PRODUCTOS
+  Lo puede ver cualquiera, con o sin sesión. Cada producto es un bloque con
+  su precio. SOLO con sesión iniciada aparecen el botón "Agregar al carrito"
+  y el carrito. Sin sesión, el bloque muestra "Inicia sesión para pedir".
+  SE CONECTA CON: style.css + tienda.css + catalogo.css (diseño) y
+  catalogo.js (pide /api/productos y /api/me al servidor).
+-->
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Los Piwis | Catálogo</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="tienda.css">
+    <link rel="stylesheet" href="catalogo.css">
+</head>
+<body class="tienda catalogo">
+
+    <div class="topbar">
+        <span>Panel de control · Papelería Los Piwis</span>
+        <span>Organización · Inventario · Localización</span>
+    </div>
+
+    <header>
+        <div class="header-container">
+            <a href="index.html" class="brand">
+                <div class="logo"></div>
+                <div>
+                    <h2>LOS <span>PIWIS</span></h2>
+                    <small>PAPELERÍA · INVENTARIO</small>
+                </div>
+            </a>
+
+            <form class="search" id="searchForm">
+                <input type="search" id="searchInput" placeholder="Buscar producto, código o categoría..."
+                       aria-label="Buscar productos">
+                <button type="submit" aria-label="Buscar">⌕</button>
+            </form>
+
+            <div class="header-actions">
+                <!-- Carrito: empieza oculto; catalogo.js lo muestra solo si hay sesión -->
+                <button type="button" class="cart-btn" id="cartBtn" aria-label="Abrir carrito" hidden>
+                    🛒<span class="cart-count" id="cartCount" hidden>0</span>
+                </button>
+                <!-- Cambia según la sesión: "Iniciar sesión" o "Hola, nombre / Mi perfil" -->
+                <a class="admin admin-link" id="sessionLink" href="login.html">
+                    <span>¿Eres parte del equipo?</span>
+                    <strong>Iniciar sesión</strong>
+                </a>
+            </div>
+        </div>
+
+        <nav>
+            <a href="index.html">Inicio</a>
+            <a href="catalogo.html" class="activo">Catálogo</a>
+            <a href="index.html">Novedades</a>
+        </nav>
+    </header>
+
+    <main>
+        <h2 class="titulo">Catálogo</h2>
+        <p class="sub" id="resultCount">Cargando productos...</p>
+        <div id="feedback" class="feedback" role="status"></div>
+
+        <!-- Filtros: categorías (las crea catalogo.js) y orden -->
+        <div class="barra">
+            <div class="filters" id="catChips"></div>
+            <select id="orden" class="sel-orden" aria-label="Ordenar productos">
+                <option value="nombre">Ordenar: nombre</option>
+                <option value="precio-asc">Precio: menor a mayor</option>
+                <option value="precio-desc">Precio: mayor a menor</option>
+            </select>
+        </div>
+
+        <!-- Un bloque por producto (los crea catalogo.js con datos de la base) -->
+        <div class="grid" id="productGrid"></div>
+    </main>
+
+    <!-- ===== CARRITO (panel lateral, solo con sesión) ===== -->
+    <div class="overlay" id="overlay"></div>
+    <aside class="drawer" id="drawer" aria-label="Carrito de compras" aria-hidden="true">
+        <div class="drawer-head">
+            <h3>Mi carrito</h3>
+            <button type="button" class="drawer-close" id="cartClose" aria-label="Cerrar carrito">✕</button>
+        </div>
+        <div class="drawer-body" id="cartItems"></div>
+        <div class="drawer-foot">
+            <div class="total-fila"><span>Total</span><strong id="cartTotal">$0.00</strong></div>
+            <button type="button" class="btn-add" id="confirmarBtn" disabled>Confirmar pedido</button>
+            <p class="nota">La confirmación de pedidos estará disponible muy pronto.</p>
+        </div>
+    </aside>
+
+    <div class="toast" id="toast" role="status"></div>
+
+    <footer>
+        <strong>Papelería Los Piwis</strong>
+        <span>Sistema de organización y localización de productos</span>
+    </footer>
+
+    <script src="catalogo.js"></script>
+</body>
+</html>

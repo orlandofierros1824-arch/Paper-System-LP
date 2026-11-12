@@ -6,7 +6,7 @@
 - *Sistema:* Gestión de Inventario de Papelería Los Piwis
 - *Tipo de prueba:* Integración
 - *ID de prueba:* IT-02
-- *Responsable:* 
+- *Responsable:* Angel Alberto Gonzalez Flores
 - *Fecha:* 04/11/2026
 - *Versión del sistema:* 0.8
 
