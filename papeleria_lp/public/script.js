@@ -28,9 +28,6 @@ const SLIDES = [
         titulo: "Encuentra cada producto",           
         texto: "Pasillo, anaquel y estante al instante." },
 
-    {   src: "img/imageC3.png", 
-        titulo: "Inventario siempre al día",         
-        texto: "Detecta lo que necesita reposición." }
 ];
 
 /* RUTA DEL SERVIDOR QUE ENTREGA LOS PRODUCTOS (lee la base de datos) */
