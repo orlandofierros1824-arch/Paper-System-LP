@@ -23,9 +23,17 @@
    Para agregar una imagen, copia una línea y cambia sus datos.
    Para quitar una, borra su línea. */
 const SLIDES = [
-    { src: "img/slide1.jpg", titulo: "Todo para la escuela y la oficina", texto: "Cuadernos, papel y escritura en un solo lugar." },
-    { src: "img/slide2.jpg", titulo: "Encuentra cada producto",           texto: "Pasillo, anaquel y estante al instante." },
-    { src: "img/slide3.jpg", titulo: "Inventario siempre al día",         texto: "Detecta lo que necesita reposición." }
+    {   src: "img/imageC1.png", 
+        titulo: "Todo para la escuela y la oficina", 
+        texto: "Cuadernos, papel y escritura en un solo lugar." },
+
+    {   src: "img/imageC2.png", 
+        titulo: "Encuentra cada producto",           
+        texto: "Pasillo, anaquel y estante al instante." },
+
+    {   src: "img/imageC3.png", 
+        titulo: "Inventario siempre al día",         
+        texto: "Detecta lo que necesita reposición." }
 ];
 
 /* CONEXIÓN CON LA BASE DE DATOS
