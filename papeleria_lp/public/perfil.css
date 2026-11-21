@@ -1,62 +1,58 @@
-/* ==========================================================================
-   ARCHIVO: perfil.css
-   QUÉ HACE: diseño de la pantalla de perfil (perfil.html).
-   Se usa junto con style.css (colores y componentes base) y auth.css
-   (encabezado, campos y mensajes). No se conecta a la base de datos.
-   ========================================================================== */
+.perfil-pagina { --grad-a: #1d3f9e; --grad-b: #3d68d6; }
 
-.perfil-main { max-width: 960px; margin: 27px auto 50px; padding: 0 22px; }
+.header-right { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: flex-end; }
 
-/* Enlaces de la derecha del encabezado */
-.header-right { display: flex; align-items: center; gap: 16px; }
+/* Banda de bienvenida */
+.fondo_user { background: linear-gradient(115deg, #142c70, var(--grad-a) 60%, var(--grad-b)); color: #fff; padding: 48px 22px; text-align: center; }
+.bienvenido { margin: 0; font-size: clamp(24px, 4vw, 40px); letter-spacing: 1px; }
 
-/* Dos tarjetas lado a lado (una debajo de otra en pantallas pequeñas) */
-.perfil-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin-bottom: 18px; }
+.perfil { max-width: 900px; margin: 0 auto 50px; padding: 0 22px; }
+.titulo-seccion { color: var(--red); text-align: center; margin: 32px 0 18px; font-size: 22px; }
 
-.perfil-card { padding: 24px; }
-.perfil-card h3 { margin: 0 0 16px; font-size: 16px; }
-
-/* Resumen: círculo con la inicial + nombre y rol */
-.resumen { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
-.avatar {
-    width: 54px; height: 54px; border-radius: 50%;
-    background: var(--red); color: white;
-    display: grid; place-items: center;
-    font-size: 22px; font-weight: 800; flex-shrink: 0;
+/* Tarjetas de pedidos / carrito */
+.carrito-card, .pedido-card {
+    background: linear-gradient(135deg, var(--grad-a), var(--grad-b)); color: #fff;
+    border-radius: 12px; padding: 16px 18px; margin-bottom: 14px; transition: transform 0.3s;
 }
-.resumen strong { display: block; font-size: 15px; }
-.resumen small { display: block; font-size: 11px; color: var(--muted); margin-top: 4px; }
-.rol-tag {
-    display: inline-block; margin-top: 4px;
-    font-size: 10px; font-weight: 800; letter-spacing: 0.5px;
-    color: var(--red); background: #fff0f0;
-    padding: 4px 8px; border-radius: 20px;
-}
-.rol-tag:empty { display: none; }
+.carrito-card:hover, .pedido-card:hover { transform: translateX(5px); }
+.carrito-card a { color: #fff; text-decoration: underline; font-weight: 700; }
+.badge-naranja { display: inline-block; background: #ff9800; padding: 5px 10px; border-radius: 5px; margin-top: 10px; font-weight: 700; }
+.no-pedidos { text-align: center; padding: 22px; background: #f5f5f5; border-radius: 12px; color: #666; font-size: 14px; }
+.btn-enlace { display: inline-block; padding: 10px 20px; border-radius: 8px; background: #fff; color: var(--red); font-weight: 700; text-decoration: none; border: 1.5px solid var(--line); }
+.btn-enlace:hover { background: #eef3ff; }
 
-/* Correo en solo lectura: aspecto apagado para que se note que no se edita */
-.field input[readonly] { background: #f5f7fb; color: var(--muted); cursor: not-allowed; }
+/* Tabla de información */
+.tabla-perfil { width: 100%; max-width: 640px; margin: 0 auto; border-collapse: collapse; background: #fff; border: 1.5px solid var(--line); border-radius: 14px; overflow: hidden; text-align: center; }
+.tabla-perfil th, .tabla-perfil td { padding: 14px 16px; border-bottom: 1px solid #eef1f8; font-size: 14px; }
+.tabla-perfil tr:last-child th, .tabla-perfil tr:last-child td { border-bottom: 0; }
+.tabla-perfil th { width: 38%; background: #f7f9fe; color: #465164; }
+.tabla-perfil tr:hover td { background: #f2f6ff; }
+
+/* Casilla de confirmación */
+.confirmacion-checkbox { background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 22px auto 0; max-width: 640px; border-left: 4px solid #ff9800; text-align: center; }
+.confirmacion-checkbox input { transform: scale(1.1); cursor: pointer; }
+.confirmacion-checkbox label { margin-left: 10px; cursor: pointer; font-size: 14px; }
+.alert-confirmacion { background: #fff3cd; color: #856404; padding: 10px; border-radius: 5px; margin-top: 10px; font-size: 13px; }
+.alert-confirmacion[hidden] { display: none; }
 
 /* Botones */
-.btn {
-    border: 1px solid transparent;
-    border-radius: 10px;
-    padding: 11px 18px;
-    font-weight: 750;
-    font-size: 13px;
-}
-.btn.primary { background: var(--red); color: white; }
-.btn.primary:hover { background: #a91e27; }
-.btn.ghost { background: white; border-color: var(--line); color: #465164; }
-.btn.ghost:hover { border-color: #e5a1a3; color: var(--red); }
-.btn:disabled { opacity: 0.6; cursor: wait; }
+.cont-boton { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+.btn { border: 1px solid transparent; border-radius: 10px; padding: 11px 20px; font-weight: 750; font-size: 13px; }
+.btn.primary { background: var(--red); color: #fff; }
+.btn.primary:hover:not(:disabled) { background: #163280; }
+.btn.success { background: #16845b; color: #fff; }
+.btn.danger { background: #c62828; color: #fff; }
+.btn.ghost { background: #fff; border-color: var(--line); color: #465164; }
+.btn.ghost:hover { border-color: #9db3e8; color: var(--red); }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.nota-equipo { text-align: center; font-size: 12px; color: var(--muted); margin-top: 16px; }
 
-/* Tarjeta de sesión: texto a la izquierda, botón a la derecha */
-.sesion { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; }
-.sesion h3 { margin-bottom: 4px; }
-.sesion p { margin: 0; font-size: 12px; color: var(--muted); }
+/* Ventanas */
+dialog { border: 0; border-radius: 16px; padding: 0; width: min(520px, 92vw); color: var(--ink); }
+dialog::backdrop { background: rgba(20, 24, 32, 0.5); }
+.dlg-form { padding: 26px; }
+.dlg-form h3 { margin: 0 0 16px; font-size: 18px; color: var(--red); }
+.dlg-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; }
+.aviso-borrado { font-size: 13px; line-height: 1.6; color: #856404; background: #fff3cd; padding: 12px 14px; border-radius: 8px; margin: 0 0 16px; }
 
-@media (max-width: 760px) {
-    .perfil-grid { grid-template-columns: 1fr; }
-    .perfil-main { padding: 0 14px; }
-}
+@media (max-width: 560px) { .perfil { padding: 0 14px; } .fondo_user { padding: 34px 14px; } }

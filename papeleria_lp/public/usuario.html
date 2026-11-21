@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<!--
+  ARCHIVO: usuarios.html
+  QUÉ ES: pantalla para que el JEFE (dueño) administre las cuentas:
+  convertir clientes en empleados (o al revés) y activar/desactivar cuentas.
+  SE CONECTA CON: style.css, auth.css, productos.css (diseño) y usuarios.js
+  (pide y envía datos a /api/admin/usuarios). La tabla empieza vacía.
+-->
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Los Piwis | Usuarios</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="auth.css">
+    <link rel="stylesheet" href="productos.css">
+</head>
+<body>
+
+    <div class="topbar">
+        <span>Panel de control · Papelería Los Piwis</span>
+        <span>Organización · Inventario · Localización</span>
+    </div>
+
+    <header>
+        <div class="auth-header">
+            <a href="index.html" class="brand">
+                <div class="logo"></div>
+                <div>
+                    <h2>LOS <span>PIWIS</span></h2>
+                    <small>PAPELERÍA · INVENTARIO</small>
+                </div>
+            </a>
+            <div class="header-right">
+                <span id="userName"></span>
+                <a class="back-link" href="productos.html">Productos</a>
+                <a class="back-link" href="perfil.html">Mi perfil</a>
+                <button type="button" class="btn ghost" id="logoutBtn">Cerrar sesión</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="admin-main">
+        <div class="section-heading">
+            <div>
+                <h2>Usuarios</h2>
+                <p id="resultCount">Cargando usuarios...</p>
+            </div>
+        </div>
+
+        <div id="authMessage" class="auth-message" role="status"></div>
+
+        <div id="contenido">
+            <p class="ayuda">Las personas se registran solas desde la pantalla de acceso como <strong>clientes</strong>.
+                Aquí puedes darles el rol de <strong>empleado</strong> o quitárselo.</p>
+
+            <div class="toolbar">
+                <input type="search" id="buscar" placeholder="Buscar por nombre o correo..." aria-label="Buscar usuarios">
+                <div class="filters">
+                    <button type="button" class="chip active" data-filter="all">Todos</button>
+                    <button type="button" class="chip" data-filter="EMPLEADO">Empleados</button>
+                    <button type="button" class="chip" data-filter="CLIENTE">Clientes</button>
+                    <button type="button" class="chip" data-filter="inactive">Inactivos</button>
+                </div>
+            </div>
+
+            <div class="panel tabla-wrap">
+                <table class="tabla">
+                    <thead>
+                        <tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr>
+                    </thead>
+                    <tbody id="tablaBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <strong>Papelería Los Piwis</strong>
+        <span>Sistema de organización y localización de productos</span>
+    </footer>
+
+    <script src="usuarios.js"></script>
+</body>
+</html>

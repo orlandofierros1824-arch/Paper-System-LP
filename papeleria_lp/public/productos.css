@@ -84,3 +84,11 @@ dialog::backdrop { background: rgba(20, 24, 32, 0.5); }
     .header-right { flex-wrap: wrap; justify-content: flex-end; }
     .admin-main { padding: 0 14px; }
 }
+
+/* --- Pantalla de usuarios --- */
+.ayuda { font-size: 13px; color: var(--muted); line-height: 1.6; margin: 0 0 16px; }
+.sel-rol {
+    height: 36px; padding: 0 10px; border: 1px solid #dce1e9; border-radius: 8px;
+    background: white; color: var(--ink); font: inherit; font-size: 13px;
+}
+.sel-rol:focus { border-color: var(--red); outline: 0; }

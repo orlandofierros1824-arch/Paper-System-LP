@@ -1,165 +1,175 @@
 /* ==========================================================================
-   ARCHIVO: perfil.js
-   QUÉ HACE: da funcionamiento a perfil.html.
-     - Comprueba que haya una sesión iniciada (si no, manda a login.html)
-     - Muestra los datos de la cuenta que vienen de la base de datos
-     - Permite cambiar el nombre y la contraseña
-     - Permite cerrar sesión
-   SE CONECTA CON (rutas de server.js):
-     GET  /api/perfil           -> datos de tu cuenta
-     PUT  /api/perfil           -> cambiar nombre
-     PUT  /api/perfil/password  -> cambiar contraseña (pide la actual)
+   ARCHIVO: perfil.js  ·  funcionamiento de perfil.html
+   Reemplaza al PHP + jQuery + Bootstrap del diseño original.
+   SE CONECTA CON (server.js):
+     GET  /api/perfil           -> mis datos (nombre, correo, rol, fecha, id)
+     PUT  /api/perfil           -> modificar nombre, correo y contraseña (exige la actual)
+     POST /api/perfil/eliminar  -> desactivar mi cuenta (solo clientes)
      POST /api/logout           -> cerrar sesión
-   El servidor siempre usa TU sesión para saber de quién es el perfil;
-   esta página no puede pedir ni cambiar el de otra persona.
+   El servidor siempre usa TU sesión: esta página no puede ver ni cambiar
+   el perfil de otra persona.
    ========================================================================== */
 
 const $ = id => document.getElementById(id);
+const EMAIL_VALIDO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+let perfil = null;
 
-/* ==========================================================================
-   COMUNICACIÓN CON EL SERVIDOR
-   ========================================================================== */
-
-// Hace una petición y devuelve { ok, datos }.
-// Si el servidor responde 401 (sin sesión), manda a la pantalla de login.
+// Petición al servidor; con 401 (sin sesión) manda al login
 async function api(url, metodo = "GET", cuerpo) {
     const res = await fetch(url, {
         method: metodo,
         headers: cuerpo ? { "Content-Type": "application/json" } : {},
-        credentials: "same-origin",      // envía la cookie de sesión
+        credentials: "same-origin",
         body: cuerpo ? JSON.stringify(cuerpo) : undefined
     });
     let datos = {};
-    try { datos = await res.json(); } catch (_) { /* respuesta sin JSON */ }
-    if (res.status === 401) {
-        location.href = "login.html";
-        throw new Error("Sin sesión");
-    }
+    try { datos = await res.json(); } catch (_) {}
+    if (res.status === 401) { location.href = "login.html"; throw new Error("Sin sesión"); }
     return { ok: res.ok, datos };
 }
 
-// Muestra un mensaje arriba (tipo: "error" o "success"). Texto vacío = ocultar.
-function mensaje(texto, tipo) {
-    const caja = $("authMessage");
+// Muestra un mensaje en una caja (tipo: "error" o "success"); texto vacío = ocultar
+function mensaje(caja, texto, tipo) {
     caja.textContent = texto;
     caja.className = "auth-message" + (texto ? " " + tipo : "");
-    if (texto) caja.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
-
+const aviso = (texto, tipo = "success") => mensaje($("authMessage"), texto, tipo);
 const ERROR_CONEXION = "No se pudo conectar con el servidor. Intenta de nuevo.";
 
-/* ==========================================================================
-   MOSTRAR LOS DATOS DEL PERFIL
-   ========================================================================== */
-
-const formNombre = $("formNombre");
-const formPassword = $("formPassword");
-
-function mostrarPerfil(u) {
-    $("resNombre").textContent = u.nombre;
-    $("resRol").textContent = u.rol_nombre;
-    $("avatar").textContent = u.nombre.trim().charAt(0).toUpperCase() || "?";
-    $("correo").value = u.correo;
-    formNombre.nombre.value = u.nombre;
-
-    // Fecha en la que se creó la cuenta
-    const fecha = new Date(u.fecha_creacion);
-    $("resFecha").textContent = isNaN(fecha)
-        ? ""
-        : "Miembro desde " + fecha.toLocaleDateString("es-MX", { year: "numeric", month: "long", day: "numeric" });
-
-    // El acceso a administración solo se ofrece a dueño y empleados.
-    // (El servidor igual lo protege: esto es solo para no mostrar un enlace inútil.)
-    $("adminLink").hidden = !["DUENO", "EMPLEADO"].includes(u.rol);
+/* ---------- Mostrar los datos ---------- */
+function resumenCarrito(id) {
+    const caja = $("carritoResumen");
+    caja.replaceChildren();
+    let unidades = 0;
+    try { unidades = (JSON.parse(localStorage.getItem("piwis_carrito_" + id)) || [])
+        .reduce((s, i) => s + (Number(i.cantidad) || 0), 0); } catch (_) {}
+    if (!unidades) return;
+    const card = document.createElement("div");
+    card.className = "carrito-card";
+    card.append(`🛒 Tienes ${unidades} ${unidades === 1 ? "producto" : "productos"} en tu carrito. `);
+    const a = document.createElement("a");
+    a.href = "catalogo.html";
+    a.textContent = "Ir al catálogo";
+    card.append(a);
+    caja.append(card);
 }
 
-/* ==========================================================================
-   CAMBIAR NOMBRE
-   ========================================================================== */
+function mostrar(u) {
+    perfil = u;
+    $("bienvenida").textContent = "BIENVENIDO " + u.nombre.toUpperCase();
+    $("pNombre").textContent = u.nombre;
+    $("pCorreo").textContent = u.correo;
+    $("pRol").textContent = u.rol_nombre;
+    const f = new Date(u.fecha_creacion);
+    $("pFecha").textContent = isNaN(f) ? "—" : f.toLocaleDateString("es-MX", { year: "numeric", month: "long", day: "numeric" });
 
-formNombre.addEventListener("submit", async e => {
+    $("adminLink").hidden = !["DUENO", "EMPLEADO"].includes(u.rol);
+    $("usuariosLink").hidden = u.rol !== "DUENO";
+    $("btnEliminar").hidden = u.rol !== "CLIENTE";        // solo los clientes pueden eliminar su cuenta
+    $("notaEquipo").hidden = u.rol === "CLIENTE";
+    resumenCarrito(u.id);
+}
+
+/* ---------- Casilla de confirmación: habilita o bloquea los botones ---------- */
+const chk = $("confirmarAccion");
+function verificar() {
+    const ok = chk.checked;
+    $("btnModificar").disabled = !ok;
+    $("btnEliminar").disabled = !ok;
+    $("submitModificar").disabled = !ok;
+    $("mensajeConfirmacion").hidden = ok;
+}
+chk.addEventListener("change", verificar);
+verificar();
+
+/* ---------- Modificar datos ---------- */
+const dlgMod = $("dlgModificar"), formMod = $("formModificar");
+
+$("btnModificar").addEventListener("click", () => {
+    formMod.reset();
+    mensaje($("errModificar"), "");
+    formMod.nombre.value = perfil.nombre;
+    formMod.correo.value = perfil.correo;
+    dlgMod.showModal();
+});
+
+formMod.addEventListener("submit", async e => {
     e.preventDefault();
-    mensaje("");
-    const nombre = formNombre.nombre.value.trim();
+    const f = formMod, err = $("errModificar");
+    const nombre = f.nombre.value.trim(), correo = f.correo.value.trim();
+    const nueva = f.nueva.value, actual = f.actual.value;
 
-    if (nombre.length < 3) return mensaje("Escribe tu nombre completo.", "error");
+    if (!chk.checked) return mensaje(err, "Debes marcar la casilla de confirmación.", "error");
+    if (nombre.length < 3) return mensaje(err, "Escribe tu nombre completo.", "error");
+    if (!EMAIL_VALIDO.test(correo)) return mensaje(err, "Escribe un correo electrónico válido.", "error");
+    if (nueva && (nueva.length < 8 || !/[A-Za-z]/.test(nueva) || !/\d/.test(nueva)))
+        return mensaje(err, "La nueva contraseña debe tener al menos 8 caracteres, con letras y números.", "error");
+    if (nueva && nueva !== f.confirmar.value) return mensaje(err, "Las contraseñas nuevas no coinciden.", "error");
+    if (!actual) return mensaje(err, "Escribe tu contraseña actual.", "error");
 
-    const boton = formNombre.querySelector("[type=submit]");
+    const boton = $("submitModificar");
     boton.disabled = true;
     try {
-        const { ok, datos } = await api("/api/perfil", "PUT", { nombre });
-        if (!ok) return mensaje(datos.error || "No se pudo guardar el nombre.", "error");
-        $("resNombre").textContent = datos.nombre;
-        $("avatar").textContent = datos.nombre.charAt(0).toUpperCase();
-        mensaje("Nombre actualizado.", "success");
-    } catch (err) {
-        if (err.message !== "Sin sesión") mensaje(ERROR_CONEXION, "error");
+        const { ok, datos } = await api("/api/perfil", "PUT", { nombre, correo, actual, nueva });
+        if (!ok) return mensaje(err, datos.error || "No se pudieron guardar los cambios.", "error");
+        dlgMod.close();
+        mostrar({ ...perfil, nombre: datos.nombre, correo: datos.correo });
+        aviso("Datos actualizados.");
+        chk.checked = false;       // cada cambio pide confirmar de nuevo
+    } catch (er) {
+        if (er.message !== "Sin sesión") mensaje(err, ERROR_CONEXION, "error");
     } finally {
-        boton.disabled = false;
+        verificar();
     }
 });
 
-/* ==========================================================================
-   CAMBIAR CONTRASEÑA
-   ========================================================================== */
+/* ---------- Eliminar cuenta (clientes) ---------- */
+const dlgEli = $("dlgEliminar"), formEli = $("formEliminar");
 
-formPassword.addEventListener("submit", async e => {
+$("btnEliminar").addEventListener("click", () => {
+    formEli.reset();
+    $("submitEliminar").disabled = true;
+    mensaje($("errEliminar"), "");
+    dlgEli.showModal();
+});
+
+// El botón rojo solo se habilita al escribir exactamente ELIMINAR
+formEli.confirmar.addEventListener("input", () => {
+    $("submitEliminar").disabled = formEli.confirmar.value !== "ELIMINAR";
+});
+
+formEli.addEventListener("submit", async e => {
     e.preventDefault();
-    mensaje("");
-    const f = formPassword;
-    const actual = f.actual.value;
-    const nueva = f.nueva.value;
-
-    // Validaciones antes de enviar (el servidor las repite)
-    if (!actual) return mensaje("Escribe tu contraseña actual.", "error");
-    if (nueva.length < 8 || !/[A-Za-z]/.test(nueva) || !/\d/.test(nueva))
-        return mensaje("La nueva contraseña debe tener al menos 8 caracteres, con letras y números.", "error");
-    if (nueva !== f.confirmar.value) return mensaje("Las contraseñas nuevas no coinciden.", "error");
-
-    const boton = f.querySelector("[type=submit]");
+    const err = $("errEliminar");
+    if (!formEli.password.value) return mensaje(err, "Escribe tu contraseña.", "error");
+    const boton = $("submitEliminar");
     boton.disabled = true;
     try {
-        // La confirmación NO se envía; solo la actual y la nueva
-        const { ok, datos } = await api("/api/perfil/password", "PUT", { actual, nueva });
-        if (!ok) return mensaje(datos.error || "No se pudo cambiar la contraseña.", "error");
-        f.reset();
-        mensaje("Contraseña actualizada.", "success");
-    } catch (err) {
-        if (err.message !== "Sin sesión") mensaje(ERROR_CONEXION, "error");
-    } finally {
+        const { ok, datos } = await api("/api/perfil/eliminar", "POST",
+            { confirmar: formEli.confirmar.value, password: formEli.password.value });
+        if (!ok) { boton.disabled = false; return mensaje(err, datos.error || "No se pudo eliminar la cuenta.", "error"); }
+        location.href = "index.html";      // la sesión ya se cerró en el servidor
+    } catch (er) {
         boton.disabled = false;
+        if (er.message !== "Sin sesión") mensaje(err, ERROR_CONEXION, "error");
     }
 });
 
-// Botones "Ver / Ocultar" de las contraseñas
-document.querySelectorAll(".toggle-pass").forEach(btn =>
-    btn.addEventListener("click", () => {
-        const campo = btn.previousElementSibling;
-        const oculto = campo.type === "password";
-        campo.type = oculto ? "text" : "password";
-        btn.textContent = oculto ? "Ocultar" : "Ver";
-        btn.setAttribute("aria-label", oculto ? "Ocultar contraseña" : "Mostrar contraseña");
-    }));
-
-/* ==========================================================================
-   CERRAR SESIÓN
-   ========================================================================== */
+/* ---------- Cerrar ventanas y sesión ---------- */
+document.querySelectorAll("[data-cerrar]").forEach(b => b.addEventListener("click", () => b.closest("dialog").close()));
 
 $("logoutBtn").addEventListener("click", async () => {
     await fetch("/api/logout", { method: "POST", credentials: "same-origin" });
     location.href = "login.html";
 });
 
-/* ==========================================================================
-   ARRANQUE: carga el perfil al abrir la página
-   ========================================================================== */
-
+/* ---------- Arranque ---------- */
 (async function iniciar() {
     try {
         const { ok, datos } = await api("/api/perfil");   // sin sesión, api() redirige al login
-        if (!ok) return mensaje(datos.error || "No se pudo cargar tu perfil.", "error");
-        mostrarPerfil(datos);
+        if (!ok) return aviso(datos.error || "No se pudo cargar tu perfil.", "error");
+        mostrar(datos);
     } catch (err) {
-        if (err.message !== "Sin sesión") mensaje(ERROR_CONEXION, "error");
+        if (err.message !== "Sin sesión") aviso(ERROR_CONEXION, "error");
     }
 })();

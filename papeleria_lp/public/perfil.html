@@ -1,25 +1,15 @@
 <!DOCTYPE html>
-<!--
-  ARCHIVO: perfil.html
-  QUÉ ES: pantalla "Mi perfil" para cualquier usuario con sesión iniciada.
-  Permite ver los datos de la cuenta, cambiar el nombre, cambiar la
-  contraseña y cerrar sesión. Dueño y empleados ven además el acceso
-  a la administración de productos.
-  SE CONECTA CON:
-    - style.css, auth.css, perfil.css -> diseño
-    - perfil.js -> pide y envía los datos al servidor (rutas /api/perfil)
-  Los campos empiezan vacíos: perfil.js los llena con los datos de la base.
--->
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Los Piwis | Mi perfil</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="tienda.css">
     <link rel="stylesheet" href="auth.css">
     <link rel="stylesheet" href="perfil.css">
 </head>
-<body>
+<body class="tienda perfil-pagina">
 
     <div class="topbar">
         <span>Panel de control · Papelería Los Piwis</span>
@@ -29,99 +19,118 @@
     <header>
         <div class="auth-header">
             <a href="index.html" class="brand">
-                <div class="logo">P</div>
+                <div class="logo"></div>
                 <div>
                     <h2>LOS <span>PIWIS</span></h2>
                     <small>PAPELERÍA · INVENTARIO</small>
                 </div>
             </a>
             <div class="header-right">
-                <a class="back-link" href="index.html">Ver inventario</a>
-                <!-- Solo visible para dueño y empleados (lo muestra perfil.js) -->
+                <a class="back-link" href="index.html">Inicio</a>
+                <a class="back-link" href="catalogo.html">Catálogo</a>
+                <!-- Solo dueño y empleados / solo dueño (los muestra perfil.js) -->
                 <a class="back-link" id="adminLink" href="productos.html" hidden>Administrar productos</a>
+                <a class="back-link" id="usuariosLink" href="usuario.html" hidden>Usuarios</a>
+                <button type="button" class="btn ghost" id="logoutBtn">Cerrar sesión</button>
             </div>
         </div>
     </header>
 
-    <main class="perfil-main">
-
-        <div class="section-heading">
-            <div>
-                <h2>Mi perfil</h2>
-                <p>Consulta y actualiza los datos de tu cuenta.</p>
-            </div>
+    <!-- Banda de bienvenida -->
+    <div class="fondo_user">
+        <div class="contenido-bienvenida">
+            <h1 class="bienvenido" id="bienvenida">BIENVENIDO</h1>
         </div>
+    </div>
 
-        <!-- Mensajes de error o confirmación -->
+    <main class="perfil">
+
         <div id="authMessage" class="auth-message" role="status"></div>
 
-        <div class="perfil-grid">
-
-            <!-- ===== DATOS DE LA CUENTA ===== -->
-            <section class="panel perfil-card">
-                <h3>Datos de la cuenta</h3>
-
-                <!-- Resumen: inicial, nombre, rol y fecha (los llena perfil.js) -->
-                <div class="resumen">
-                    <div class="avatar" id="avatar">?</div>
-                    <div>
-                        <strong id="resNombre">Cargando...</strong>
-                        <span class="rol-tag" id="resRol"></span>
-                        <small id="resFecha"></small>
-                    </div>
-                </div>
-
-                <form id="formNombre" novalidate>
-                    <label class="field"><span>Correo electrónico</span>
-                        <!-- Solo lectura: el correo no se puede cambiar desde aquí -->
-                        <input type="email" id="correo" readonly></label>
-
-                    <label class="field"><span>Nombre completo</span>
-                        <input type="text" name="nombre" maxlength="120" autocomplete="name" required></label>
-
-                    <button type="submit" class="btn primary">Guardar nombre</button>
-                </form>
-            </section>
-
-            <!-- ===== CAMBIAR CONTRASEÑA ===== -->
-            <section class="panel perfil-card">
-                <h3>Cambiar contraseña</h3>
-
-                <form id="formPassword" novalidate>
-                    <label class="field"><span>Contraseña actual</span>
-                        <div class="pass">
-                            <input type="password" name="actual" autocomplete="current-password" required>
-                            <button type="button" class="toggle-pass" aria-label="Mostrar contraseña">Ver</button>
-                        </div></label>
-
-                    <label class="field"><span>Nueva contraseña</span>
-                        <div class="pass">
-                            <input type="password" name="nueva" autocomplete="new-password" minlength="8" required>
-                            <button type="button" class="toggle-pass" aria-label="Mostrar contraseña">Ver</button>
-                        </div>
-                        <small class="hint">Mínimo 8 caracteres, con letras y números.</small></label>
-
-                    <label class="field"><span>Confirmar nueva contraseña</span>
-                        <div class="pass">
-                            <input type="password" name="confirmar" autocomplete="new-password" required>
-                            <button type="button" class="toggle-pass" aria-label="Mostrar contraseña">Ver</button>
-                        </div></label>
-
-                    <button type="submit" class="btn primary">Cambiar contraseña</button>
-                </form>
-            </section>
-        </div>
-
-        <!-- ===== SESIÓN ===== -->
-        <section class="panel perfil-card sesion">
-            <div>
-                <h3>Sesión</h3>
-                <p>Cierra sesión si estás en un equipo compartido.</p>
+        <!-- ===== MIS PEDIDOS (equivale a "Libros prestados") =====
+             Se llenará cuando exista la confirmación de pedidos. Mientras tanto
+             muestra el resumen del carrito y un mensaje de "sin pedidos". -->
+        <section>
+            <h2 class="titulo-seccion">🛒 Mis pedidos</h2>
+            <div id="carritoResumen"></div>
+            <div class="no-pedidos" id="pedidos">
+                📭 No tienes ningún pedido por ahora.
+                <br><br>
+                <a class="btn-enlace" href="catalogo.html">📚 Ver el catálogo de productos</a>
             </div>
-            <button type="button" class="btn ghost" id="logoutBtn">Cerrar sesión</button>
         </section>
 
+        <!-- ===== INFORMACIÓN DEL PERFIL ===== -->
+        <h2 class="titulo-seccion">Información del perfil</h2>
+        <table class="tabla-perfil">
+            <tr><th>Nombre</th><td id="pNombre">…</td></tr>
+            <tr><th>Correo</th><td id="pCorreo">…</td></tr>
+            <tr><th>Rol</th><td id="pRol">…</td></tr>
+            <tr><th>Miembro desde</th><td id="pFecha">…</td></tr>
+        </table>
+
+        <!-- Casilla de confirmación: sin marcarla, los botones están bloqueados -->
+        <div class="confirmacion-checkbox">
+            <input type="checkbox" id="confirmarAccion">
+            <label for="confirmarAccion"><strong>✓ Confirmo que quiero realizar cambios en mi cuenta</strong></label>
+            <div class="alert-confirmacion" id="mensajeConfirmacion">
+                Debes marcar la casilla de confirmación para poder modificar o eliminar tu cuenta.
+            </div>
+        </div>
+
+        <div class="cont-boton">
+            <button type="button" class="btn success" id="btnModificar">Modificar datos</button>
+            <!-- Solo clientes pueden eliminar su cuenta -->
+            <button type="button" class="btn danger" id="btnEliminar" hidden>Eliminar cuenta</button>
+        </div>
+        <p class="nota-equipo" id="notaEquipo" hidden>Las cuentas del equipo (dueño y empleados) las administra el dueño desde la pantalla de usuarios.</p>
     </main>
+
+    <!-- ===== VENTANA: MODIFICAR DATOS ===== -->
+    <dialog id="dlgModificar">
+        <form id="formModificar" class="dlg-form" novalidate>
+            <h3>Modificar datos de usuario</h3>
+            <div id="errModificar" class="auth-message" role="alert"></div>
+
+            <label class="field"><span>Nombre completo</span>
+                <input name="nombre" maxlength="120" autocomplete="name" required></label>
+            <label class="field"><span>Correo electrónico</span>
+                <input name="correo" type="email" maxlength="190" autocomplete="email" required></label>
+            <label class="field"><span>Nueva contraseña (opcional)</span>
+                <input name="nueva" type="password" autocomplete="new-password">
+                <small class="hint">Déjala en blanco para conservar la actual. Mínimo 8 caracteres, con letras y números.</small></label>
+            <label class="field"><span>Confirmar nueva contraseña</span>
+                <input name="confirmar" type="password" autocomplete="new-password"></label>
+            <label class="field"><span>Contraseña actual (obligatoria)</span>
+                <input name="actual" type="password" autocomplete="current-password" required>
+                <small class="hint">Por seguridad, la pedimos para guardar cualquier cambio.</small></label>
+
+            <div class="dlg-actions">
+                <button type="button" class="btn ghost" data-cerrar>Cancelar</button>
+                <button type="submit" class="btn primary" id="submitModificar" disabled>Guardar cambios</button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- ===== VENTANA: ELIMINAR CUENTA ===== -->
+    <dialog id="dlgEliminar">
+        <form id="formEliminar" class="dlg-form" novalidate>
+            <h3>⚠️ Eliminar cuenta</h3>
+            <div id="errEliminar" class="auth-message" role="alert"></div>
+            <p class="aviso-borrado">Tu cuenta se <strong>desactivará</strong>: no podrás iniciar sesión y tus datos dejarán de mostrarse.
+                Tu historial de pedidos se conserva. Si cambias de opinión, el dueño de la papelería puede reactivarla.</p>
+
+            <label class="field"><span>Para confirmar, escribe ELIMINAR</span>
+                <input name="confirmar" autocomplete="off" placeholder="ELIMINAR"></label>
+            <label class="field"><span>Tu contraseña</span>
+                <input name="password" type="password" autocomplete="current-password" required></label>
+
+            <div class="dlg-actions">
+                <button type="button" class="btn ghost" data-cerrar>Cancelar</button>
+                <button type="submit" class="btn danger" id="submitEliminar" disabled>Eliminar mi cuenta</button>
+            </div>
+        </form>
+    </dialog>
 
     <footer>
         <strong>Papelería Los Piwis</strong>

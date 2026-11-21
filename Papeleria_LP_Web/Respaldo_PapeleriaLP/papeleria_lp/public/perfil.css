@@ -1,0 +1,62 @@
+/* ==========================================================================
+   ARCHIVO: perfil.css
+   QUÉ HACE: diseño de la pantalla de perfil (perfil.html).
+   Se usa junto con style.css (colores y componentes base) y auth.css
+   (encabezado, campos y mensajes). No se conecta a la base de datos.
+   ========================================================================== */
+
+.perfil-main { max-width: 960px; margin: 27px auto 50px; padding: 0 22px; }
+
+/* Enlaces de la derecha del encabezado */
+.header-right { display: flex; align-items: center; gap: 16px; }
+
+/* Dos tarjetas lado a lado (una debajo de otra en pantallas pequeñas) */
+.perfil-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin-bottom: 18px; }
+
+.perfil-card { padding: 24px; }
+.perfil-card h3 { margin: 0 0 16px; font-size: 16px; }
+
+/* Resumen: círculo con la inicial + nombre y rol */
+.resumen { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+.avatar {
+    width: 54px; height: 54px; border-radius: 50%;
+    background: var(--red); color: white;
+    display: grid; place-items: center;
+    font-size: 22px; font-weight: 800; flex-shrink: 0;
+}
+.resumen strong { display: block; font-size: 15px; }
+.resumen small { display: block; font-size: 11px; color: var(--muted); margin-top: 4px; }
+.rol-tag {
+    display: inline-block; margin-top: 4px;
+    font-size: 10px; font-weight: 800; letter-spacing: 0.5px;
+    color: var(--red); background: #fff0f0;
+    padding: 4px 8px; border-radius: 20px;
+}
+.rol-tag:empty { display: none; }
+
+/* Correo en solo lectura: aspecto apagado para que se note que no se edita */
+.field input[readonly] { background: #f5f7fb; color: var(--muted); cursor: not-allowed; }
+
+/* Botones */
+.btn {
+    border: 1px solid transparent;
+    border-radius: 10px;
+    padding: 11px 18px;
+    font-weight: 750;
+    font-size: 13px;
+}
+.btn.primary { background: var(--red); color: white; }
+.btn.primary:hover { background: #a91e27; }
+.btn.ghost { background: white; border-color: var(--line); color: #465164; }
+.btn.ghost:hover { border-color: #e5a1a3; color: var(--red); }
+.btn:disabled { opacity: 0.6; cursor: wait; }
+
+/* Tarjeta de sesión: texto a la izquierda, botón a la derecha */
+.sesion { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; }
+.sesion h3 { margin-bottom: 4px; }
+.sesion p { margin: 0; font-size: 12px; color: var(--muted); }
+
+@media (max-width: 760px) {
+    .perfil-grid { grid-template-columns: 1fr; }
+    .perfil-main { padding: 0 14px; }
+}

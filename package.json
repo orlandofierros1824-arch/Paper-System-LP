@@ -15,12 +15,15 @@
     "test:integration": "jest tests/integration --passWithNoTests",
     "test:e2e": "playwright test"
   },
+
   "jest": {
-    "testMatch": [
-      "<rootDir>/tests/unit/**/*.test.js",
-      "<rootDir>/tests/integration/**/*.test.js"
-    ]
-  },
+  "roots": ["<rootDir>/tests"],
+  "testMatch": [
+    "<rootDir>/tests/unit/**/*.test.js",
+    "<rootDir>/tests/integration/**/*.test.js"
+  ]
+},
+
   "repository": {
     "type": "git",
     "url": "git+https://github.com/orlandofierros1824-arch/Paper-System-LP.git"

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<!--
+  ARCHIVO: perfil.html
+  QUÉ ES: pantalla "Mi perfil" para cualquier usuario con sesión iniciada.
+  Permite ver los datos de la cuenta, cambiar el nombre, cambiar la
+  contraseña y cerrar sesión. Dueño y empleados ven además el acceso
+  a la administración de productos.
+  SE CONECTA CON:
+    - style.css, auth.css, perfil.css -> diseño
+    - perfil.js -> pide y envía los datos al servidor (rutas /api/perfil)
+  Los campos empiezan vacíos: perfil.js los llena con los datos de la base.
+-->
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Los Piwis | Mi perfil</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="auth.css">
+    <link rel="stylesheet" href="perfil.css">
+</head>
+<body>
+
+    <div class="topbar">
+        <span>Panel de control · Papelería Los Piwis</span>
+        <span>Organización · Inventario · Localización</span>
+    </div>
+
+    <header>
+        <div class="auth-header">
+            <a href="index.html" class="brand">
+                <div class="logo">P</div>
+                <div>
+                    <h2>LOS <span>PIWIS</span></h2>
+                    <small>PAPELERÍA · INVENTARIO</small>
+                </div>
+            </a>
+            <div class="header-right">
+                <a class="back-link" href="index.html">Ver inventario</a>
+                <!-- Solo visible para dueño y empleados (lo muestra perfil.js) -->
+                <a class="back-link" id="adminLink" href="productos.html" hidden>Administrar productos</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="perfil-main">
+
+        <div class="section-heading">
+            <div>
+                <h2>Mi perfil</h2>
+                <p>Consulta y actualiza los datos de tu cuenta.</p>
+            </div>
+        </div>
+
+        <!-- Mensajes de error o confirmación -->
+        <div id="authMessage" class="auth-message" role="status"></div>
+
+        <div class="perfil-grid">
+
+            <!-- ===== DATOS DE LA CUENTA ===== -->
+            <section class="panel perfil-card">
+                <h3>Datos de la cuenta</h3>
+
+                <!-- Resumen: inicial, nombre, rol y fecha (los llena perfil.js) -->
+                <div class="resumen">
+                    <div class="avatar" id="avatar">?</div>
+                    <div>
+                        <strong id="resNombre">Cargando...</strong>
+                        <span class="rol-tag" id="resRol"></span>
+                        <small id="resFecha"></small>
+                    </div>
+                </div>
+
+                <form id="formNombre" novalidate>
+                    <label class="field"><span>Correo electrónico</span>
+                        <!-- Solo lectura: el correo no se puede cambiar desde aquí -->
+                        <input type="email" id="correo" readonly></label>
+
+                    <label class="field"><span>Nombre completo</span>
+                        <input type="text" name="nombre" maxlength="120" autocomplete="name" required></label>
+
+                    <button type="submit" class="btn primary">Guardar nombre</button>
+                </form>
+            </section>
+
+            <!-- ===== CAMBIAR CONTRASEÑA ===== -->
+            <section class="panel perfil-card">
+                <h3>Cambiar contraseña</h3>
+
+                <form id="formPassword" novalidate>
+                    <label class="field"><span>Contraseña actual</span>
+                        <div class="pass">
+                            <input type="password" name="actual" autocomplete="current-password" required>
+                            <button type="button" class="toggle-pass" aria-label="Mostrar contraseña">Ver</button>
+                        </div></label>
+
+                    <label class="field"><span>Nueva contraseña</span>
+                        <div class="pass">
+                            <input type="password" name="nueva" autocomplete="new-password" minlength="8" required>
+                            <button type="button" class="toggle-pass" aria-label="Mostrar contraseña">Ver</button>
+                        </div>
+                        <small class="hint">Mínimo 8 caracteres, con letras y números.</small></label>
+
+                    <label class="field"><span>Confirmar nueva contraseña</span>
+                        <div class="pass">
+                            <input type="password" name="confirmar" autocomplete="new-password" required>
+                            <button type="button" class="toggle-pass" aria-label="Mostrar contraseña">Ver</button>
+                        </div></label>
+
+                    <button type="submit" class="btn primary">Cambiar contraseña</button>
+                </form>
+            </section>
+        </div>
+
+        <!-- ===== SESIÓN ===== -->
+        <section class="panel perfil-card sesion">
+            <div>
+                <h3>Sesión</h3>
+                <p>Cierra sesión si estás en un equipo compartido.</p>
+            </div>
+            <button type="button" class="btn ghost" id="logoutBtn">Cerrar sesión</button>
+        </section>
+
+    </main>
+
+    <footer>
+        <strong>Papelería Los Piwis</strong>
+        <span>Sistema de organización y localización de productos</span>
+    </footer>
+
+    <script src="perfil.js"></script>
+</body>
+</html>

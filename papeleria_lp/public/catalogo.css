@@ -1,0 +1,79 @@
+/* ==========================================================================
+   ARCHIVO: catalogo.css
+   Diseño propio del catálogo (catalogo.html): botón y panel del carrito,
+   selector de cantidad, botón "Agregar" y aviso emergente. Las tarjetas y
+   la cuadrícula vienen de tienda.css.
+   ========================================================================== */
+
+/* Garantiza que "hidden" oculte aunque el elemento tenga display propio */
+.catalogo [hidden] { display: none !important; }
+
+/* Zona derecha del encabezado: carrito + sesión */
+.header-actions { display: flex; align-items: center; gap: 18px; }
+.cart-btn {
+    position: relative; width: 44px; height: 44px; border-radius: 12px;
+    border: 1.5px solid var(--line); background: #fff; font-size: 20px;
+}
+.cart-btn:hover { border-color: #9db3e8; }
+.cart-count {
+    position: absolute; top: -7px; right: -7px; min-width: 20px; height: 20px; padding: 0 5px;
+    border-radius: 10px; background: var(--red); color: #fff;
+    font-size: 11px; font-weight: 800; display: grid; place-items: center;
+}
+
+/* Pestaña activa del menú: "Catálogo" (y "Inicio" deja de marcarse) */
+.catalogo nav a:first-child:not(.activo) { color: #465164; border-bottom-color: transparent; }
+.catalogo nav a:first-child:not(.activo):hover { color: var(--red); border-bottom-color: var(--red); }
+.catalogo nav a.activo { color: var(--red); border-bottom-color: var(--red); }
+
+.catalogo main { max-width: 1200px; margin: 0 auto 50px; padding: 0 22px; }
+
+/* Datos de precio y acciones dentro de cada bloque */
+.precio-fila { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-top: 10px; }
+.card-act { display: grid; gap: 8px; padding: 0 16px 16px; }
+.qty { display: flex; align-items: center; justify-content: space-between; border: 1.5px solid var(--line); border-radius: 10px; overflow: hidden; }
+.qty button { width: 40px; height: 36px; border: 0; background: #f2f6ff; color: var(--red); font-size: 18px; font-weight: 700; }
+.qty button:hover { background: #e4ecff; }
+.qty span { font-weight: 700; font-size: 14px; }
+.btn-add { border: 0; border-radius: 10px; padding: 11px; background: var(--red); color: #fff; font-weight: 700; font-size: 13px; }
+.btn-add:hover:not(:disabled) { background: #163280; }
+.btn-add:disabled { background: #cfd6e6; color: #fff; cursor: not-allowed; }
+.login-hint { display: block; text-align: center; padding: 10px; border: 1.5px dashed #9db3e8; border-radius: 10px; font-size: 12px; font-weight: 700; color: var(--red); text-decoration: none; }
+.login-hint:hover { background: #eef3ff; }
+.sel-orden { height: 38px; padding: 0 12px; border: 1.5px solid var(--line); border-radius: 20px; background: #fff; color: #465164; font: inherit; font-size: 12px; font-weight: 600; }
+
+/* Panel lateral del carrito */
+.overlay { position: fixed; inset: 0; background: rgba(20, 24, 32, 0.45); opacity: 0; pointer-events: none; transition: 0.2s; z-index: 40; }
+.overlay.open { opacity: 1; pointer-events: auto; }
+.drawer {
+    position: fixed; top: 0; right: 0; height: 100%; width: min(410px, 100%); background: #fff;
+    display: flex; flex-direction: column; z-index: 50; transform: translateX(100%); transition: transform 0.25s;
+    box-shadow: -8px 0 30px rgba(20, 24, 32, 0.15);
+}
+.drawer.open { transform: none; }
+.drawer-head { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-bottom: 1px solid var(--line); }
+.drawer-head h3 { margin: 0; font-size: 18px; color: var(--red); }
+.drawer-close { border: 0; background: transparent; font-size: 18px; color: var(--muted); }
+.drawer-body { flex: 1; overflow-y: auto; padding: 8px 20px; }
+.vacio { text-align: center; color: var(--muted); font-size: 13px; padding: 40px 10px; }
+.item { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; padding: 14px 0; border-bottom: 1px solid #eef1f8; }
+.item h4 { margin: 0; font-size: 13px; line-height: 1.4; }
+.item .unit { font-size: 12px; color: var(--muted); }
+.item .linea { font-weight: 800; color: var(--red); text-align: right; }
+.item .qty { width: 112px; }
+.item .qty button { width: 32px; height: 30px; }
+.item .quitar { border: 0; background: transparent; color: var(--muted); font-size: 12px; text-align: right; text-decoration: underline; }
+.drawer-foot { padding: 16px 20px 20px; border-top: 1px solid var(--line); display: grid; gap: 10px; }
+.total-fila { display: flex; justify-content: space-between; align-items: center; font-size: 15px; }
+.total-fila strong { font-size: 22px; color: var(--red); }
+.nota { margin: 0; text-align: center; font-size: 11px; color: var(--muted); }
+
+/* Aviso emergente */
+.toast {
+    position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 12px); background: var(--dark); color: #fff;
+    padding: 12px 18px; border-radius: 10px; font-size: 13px; opacity: 0; pointer-events: none; transition: 0.2s; z-index: 60; max-width: 90vw;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media (max-width: 900px) { .header-actions { justify-content: flex-end; } }
+@media (max-width: 560px) { .catalogo main { padding: 0 14px; } }

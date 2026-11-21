@@ -1,0 +1,86 @@
+/* ==========================================================================
+   ARCHIVO: productos.css
+   QUÉ HACE: diseño de la pantalla de administración (productos.html).
+   Se usa junto con style.css (colores y componentes base) y auth.css
+   (encabezado, campos y mensajes). No se conecta a la base de datos.
+   ========================================================================== */
+
+.admin-main { max-width: 1200px; margin: 27px auto 50px; padding: 0 22px; }
+
+/* Zona derecha del encabezado: nombre, enlace y botón de salir */
+.header-right { display: flex; align-items: center; gap: 14px; font-size: 12px; color: var(--muted); }
+.header-right #userName { font-weight: 700; color: var(--ink); }
+
+/* --- Botones --- */
+.btn {
+    border: 1px solid transparent;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-weight: 750;
+    font-size: 13px;
+}
+.btn.primary { background: var(--red); color: white; }
+.btn.primary:hover { background: #a91e27; }
+.btn.ghost { background: white; border-color: var(--line); color: #465164; }
+.btn.ghost:hover { border-color: #e5a1a3; color: var(--red); }
+.btn.small { padding: 6px 10px; font-size: 12px; }
+.btn:disabled { opacity: 0.6; cursor: wait; }
+
+/* --- Buscador y filtros --- */
+.toolbar { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+.toolbar input[type="search"] {
+    flex: 1; min-width: 220px; height: 42px;
+    border: 1px solid #dce1e9; border-radius: 10px;
+    padding: 0 14px; outline: 0; background: white;
+}
+.toolbar input[type="search"]:focus { border-color: var(--red); }
+.filters { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip {
+    border: 1px solid var(--line); background: white; color: #465164;
+    font-size: 12px; font-weight: 650; padding: 7px 12px; border-radius: 20px;
+}
+.chip:hover { border-color: #e5a1a3; }
+.chip.active { background: var(--red); border-color: var(--red); color: white; }
+
+/* --- Tabla --- */
+.tabla-wrap { overflow-x: auto; }
+.tabla { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 820px; }
+.tabla th {
+    text-align: left; font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase;
+    color: var(--muted); padding: 13px 14px; border-bottom: 1px solid var(--line); background: #fafbfd;
+}
+.tabla td { padding: 12px 14px; border-bottom: 1px solid #eff1f5; vertical-align: middle; }
+.tabla tr:last-child td { border-bottom: 0; }
+.tabla .num { text-align: right; white-space: nowrap; }
+.tabla .nombre { font-weight: 750; }
+.tabla .codigo, .tabla .muted { color: var(--muted); font-size: 12px; }
+.tabla tr.inactiva td { opacity: 0.55; }
+.tabla .acciones { display: flex; gap: 6px; flex-wrap: wrap; }
+.status.inactive { color: var(--muted); background: #eef0f4; }
+
+/* --- Ventanas (dialog) --- */
+dialog { border: 0; border-radius: 16px; padding: 0; width: min(580px, 92vw); color: var(--ink); }
+dialog::backdrop { background: rgba(20, 24, 32, 0.5); }
+.dlg-form { padding: 26px; }
+.dlg-form h3 { margin: 0 0 16px; font-size: 18px; }
+.dlg-sub { margin: -8px 0 16px; font-size: 13px; color: var(--muted); }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.dlg-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; }
+
+/* Selects y área de texto con el mismo aspecto que los campos de auth.css */
+.field select, .field textarea {
+    width: 100%; border: 1px solid #dce1e9; border-radius: 10px;
+    padding: 0 14px; background: white; color: var(--ink); outline: 0;
+}
+.field select { height: 44px; }
+.field textarea { padding: 12px 14px; resize: vertical; }
+.field select:focus, .field textarea:focus { border-color: var(--red); }
+.inline { display: flex; gap: 8px; }
+.inline select { flex: 1; min-width: 0; }
+
+@media (max-width: 600px) {
+    .row2, .row3 { grid-template-columns: 1fr; gap: 0; }
+    .header-right { flex-wrap: wrap; justify-content: flex-end; }
+    .admin-main { padding: 0 14px; }
+}

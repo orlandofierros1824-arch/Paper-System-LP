@@ -1,0 +1,76 @@
+/* ==========================================================================
+   ARCHIVO: tienda.css
+   Estilo visual de la página pública (index.html): azul, tarjetas redondeadas
+   y carruseles. Se carga DESPUÉS de style.css y solo afecta a index.html
+   (todo cuelga de body.tienda), así que login, perfil y administración
+   siguen igual.
+   TRUCO: style.css usa la variable --red para el color de marca. Aquí se
+   redefine como azul solo en esta página. Para otro color, cambia --red.
+   ========================================================================== */
+
+.tienda {
+    --red: #1d3f9e;        /* color de marca (aquí es azul) */
+    --line: #dbe3f5;
+    --bg: #ffffff;
+}
+
+/* Carrusel principal en azul */
+.tienda .carousel { border-radius: 22px; background: linear-gradient(115deg, #142c70, #1d3f9e 60%, #3d68d6); }
+
+/* "Agotado" sigue en rojo aunque la marca sea azul */
+.tienda .out { color: #c62828; background: #ffeded; }
+.tienda .low { color: var(--amber); background: #fff3dc; }
+.tienda .chip:hover { border-color: #9db3e8; }
+
+/* Títulos de sección en azul, como en la referencia */
+.titulo { color: var(--red); font-size: 22px; margin: 36px 0 4px; letter-spacing: -0.4px; }
+.sub { font-size: 12px; color: var(--muted); margin: 0 0 14px; }
+
+/* ---------- Categorías: tarjetas con icono, en fila deslizable ---------- */
+.cats { display: flex; gap: 16px; overflow-x: auto; padding: 6px 2px 14px; scroll-snap-type: x proximity; }
+.cat {
+    flex: 0 0 150px; height: 140px;
+    display: grid; place-items: center; align-content: center; gap: 10px;
+    background: #fff; color: var(--red);
+    border: 1.5px solid var(--line); border-radius: 22px;
+    font-size: 14px; font-weight: 600; text-align: center; padding: 8px;
+    scroll-snap-align: start; transition: 0.15s;
+}
+.cat .ico { font-size: 40px; line-height: 1; }
+.cat:hover { transform: translateY(-2px); border-color: #9db3e8; }
+.cat.active { background: #eef3ff; border-color: var(--red); }
+
+/* ---------- Filtros ---------- */
+.barra { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+
+/* ---------- Tarjetas de producto ---------- */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+.card { background: #fff; border: 1.5px solid var(--line); border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; }
+.card-img { position: relative; height: 140px; display: grid; place-items: center; font-size: 62px; background: #f2f6ff; }
+.card-img .status { position: absolute; top: 12px; right: 12px; font-size: 10px; }
+.card-body { padding: 14px 16px 12px; flex: 1; }
+.code { font-size: 11px; color: #9aa3b5; }
+.card h3 { font-size: 14px; line-height: 1.4; margin: 6px 0 10px; }
+.loc { font-size: 12px; color: var(--ink); font-weight: 600; }
+.cat-name { font-size: 11px; color: var(--muted); margin-top: 4px; }
+.card-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 12px 16px; border-top: 1px solid #e8edf8; }
+.price { font-size: 19px; font-weight: 800; color: var(--red); }
+.stock-txt { font-size: 12px; color: var(--muted); }
+.grid .empty-state { grid-column: 1 / -1; }
+
+/* ---------- Guía de ubicaciones: en una fila ---------- */
+.tienda .panel { border-radius: 20px; border-width: 1.5px; }
+.tienda .location-list { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.tienda .location { margin: 0; }
+.tienda .location span { background: #eef3ff; }
+.tienda .location-example { background: #eef3ff; }
+
+@media (max-width: 760px) {
+    .tienda .location-list { grid-template-columns: 1fr 1fr; }
+    .cat { flex-basis: 128px; height: 124px; }
+}
+@media (max-width: 480px) {
+    .tienda .location-list { grid-template-columns: 1fr; }
+    .grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .card-img { height: 110px; font-size: 48px; }
+}
